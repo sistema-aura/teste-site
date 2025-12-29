@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8">
+  <title>Casos — Sistema AURA</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <link rel="icon" href="../Aurinha.png">
+  <link rel="stylesheet" href="../style.css">
+
+  <style>
+    a{ text-decoration:none !important; }
+
+    /* ===== Sidebar (igual ao teu padrão) ===== */
+    .sidebar ul li a{
+      display:flex;
+      align-items:center;
+      gap:10px;
+    }
+    .sidebar .icon{
+      width:22px;
+      text-align:center;
+      opacity:.9;
+    }
+    .sidebar .label{ white-space:nowrap; }
+    .agent-display{
+      font-size:.85rem;
+      opacity:.85;
+      margin:0 0 12px;
+      display:block;
+    }
+
+    /* ===== Top / ações ===== */
+    .top-row{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      flex-wrap:wrap;
+      margin-bottom:1rem;
+    }
+    .top-left{ display:flex; align-items:center; gap:10px; }
+    .top-actions{ display:flex; gap:10px; flex-wrap:wrap; }
+
+    .btn-soft-aura{
+      background:rgba(180,107,255,.18);
+      border:1px solid rgba(180,107,255,.35);
+      border-radius:14px;
+      padding:.6rem 1.2rem;
+      font-weight:800;
+      cursor:pointer;
+      transition:.25s;
+      color:#fff;
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+    }
+    .btn-soft-aura:hover{ background:rgba(180,107,255,.28); transform:translateY(-2px); }
+
+    .btn-main-aura{
+      background:linear-gradient(135deg,#a855f7,#7c3aed);
+      border:none;
+      border-radius:14px;
+      padding:.65rem 1.4rem;
+      font-weight:900;
+      color:#fff;
+      cursor:pointer;
+      box-shadow:0 12px 30px rgba(168,85,247,.35);
+      transition:.25s;
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+    }
+    .btn-main-aura:hover{ transform:translateY(-2px); box-shadow:0 18px 40px rgba(168,85,247,.45); }
+
+    .btn-danger-aura{
+      background:linear-gradient(135deg,#ff4d6d,#ff7c6b);
+      border:none;
+      border-radius:14px;
+      padding:.6rem 1.2rem;
+      font-weight:900;
+      color:#fff;
+      cursor:pointer;
+      transition:.25s;
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      box-shadow:0 12px 30px rgba(255,77,109,.25);
+    }
+    .btn-danger-aura:hover{ transform:translateY(-2px); box-shadow:0 18px 40px rgba(255,77,109,.35); }
+
+    /* ===== Pesquisa ===== */
+    .search-wrapper{
+      position:relative;
+      margin:.2rem 0 1.2rem;
+    }
+    .search-wrapper input{
+      width:100%;
+      padding:.85rem 1rem .85rem 2.8rem;
+      border-radius:14px;
+      background:rgba(0,0,0,.35);
+      border:1px solid rgba(255,255,255,.12);
+      color:#fff;
+      font-size:.9rem;
+      transition:.25s;
+    }
+    .search-wrapper input:focus{
+      outline:none;
+      border-color:#a855f7;
+      box-shadow:0 0 0 2px rgba(168,85,247,.35);
+      background:rgba(0,0,0,.45);
+    }
+    .search-wrapper .icon{
+      position:absolute;
+      left:1rem;
+      top:50%;
+      transform:translateY(-50%);
+      opacity:.75;
+      pointer-events:none;
+    }
+
+    /* ===== Lista / cards ===== */
+    .cases-list{ display:flex; flex-direction:column; gap:14px; }
+
+    .case-row{
+      position:relative;
+      background:rgba(255,255,255,.06);
+      border:1px solid rgba(255,255,255,.08);
+      border-radius:18px;
+      padding:1.2rem 1.3rem;
+      box-shadow:0 18px 40px rgba(180,107,255,.18);
+      transition:.25s;
+      display:flex;
+      gap:16px;
+      align-items:center;
+      justify-content:space-between;
+      flex-wrap:wrap;
+      backdrop-filter: blur(12px);
+    }
+    .case-row:hover{ transform:translateY(-2px); box-shadow:0 24px 52px rgba(180,107,255,.26); }
+
+    .case-left{ min-width:260px; flex:1; }
+    .case-title{ margin:0 0 .25rem; font-size:1.1rem; font-weight:900; color:#f3e8ff; }
+    .case-sub{ margin:0; opacity:.9; font-size:.9rem; }
+
+    .case-mid{
+      display:flex;
+      gap:12px;
+      flex-wrap:wrap;
+      justify-content:flex-start;
+      align-items:center;
+      min-width:220px;
+    }
+
+    .pill{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding:.45rem .75rem;
+      border-radius:999px;
+      background:rgba(168,85,247,.18);
+      border:1px solid rgba(168,85,247,.30);
+      font-size:.82rem;
+      font-weight:800;
+      opacity:.95;
+      white-space:nowrap;
+    }
+
+    .status{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding:.45rem .75rem;
+      border-radius:999px;
+      background:rgba(140,255,199,.14);
+      border:1px solid rgba(140,255,199,.22);
+      font-size:.82rem;
+      font-weight:900;
+      color:#b8ffe0;
+      white-space:nowrap;
+    }
+
+    .case-actions{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      justify-content:flex-end;
+      align-items:center;
+      min-width:320px;
+    }
+
+    /* ===== Modal bonito ===== */
+    .modal-overlay{
+      position:fixed;
+      inset:0;
+      background:rgba(20,0,40,.60);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      z-index:9999;
+      backdrop-filter:blur(4px);
+      padding:18px;
+    }
+    .modal-box{
+      width:min(520px, 100%);
+      background:rgba(30,0,60,.95);
+      border:1px solid rgba(255,255,255,.08);
+      border-radius:18px;
+      padding:1.4rem 1.6rem;
+      box-shadow:0 20px 55px rgba(180,107,255,.35);
+    }
+    .modal-box h3{ margin:0 0 .6rem; font-weight:900; color:#f3e8ff; }
+    .modal-box p{ margin:.35rem 0; opacity:.92; line-height:1.35; }
+    .modal-actions{
+      display:flex;
+      justify-content:flex-end;
+      gap:10px;
+      margin-top:1.2rem;
+      flex-wrap:wrap;
+    }
+
+    .hr{
+      height:1px;
+      background:rgba(255,255,255,.10);
+      margin:.8rem 0;
+    }
+    .muted{ opacity:.7; }
+
+    /* ===== Ghost global (overlay full screen) ===== */
+    .ghost-global{
+      position:fixed;
+      inset:0;
+      background:rgba(15,10,30,.75);
+      backdrop-filter: blur(8px);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      z-index:99999;
+    }
+    .ghost-global img{
+      width:160px;
+      animation: float 2.5s ease-in-out infinite;
+      filter: drop-shadow(0 0 25px rgba(180,80,255,.6));
+    }
+    @keyframes float {
+      0% { transform: translateY(0px); }
+      50% { transform: translateY(-12px); }
+      100% { transform: translateY(0px); }
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- Sidebar -->
+  <div class="sidebar">
+    <h2 class="logo">SISTEMA AURA</h2>
+    <span id="agentNameDisplay" class="agent-display">Agente: -</span>
+
+    <ul>
+      <li><a href="../dashboard.html" class="navlink active"><span class="icon">🏠</span><span class="label">Dashboard</span></a></li>
+      <li><a href="../pesquisa/ver.html" class="navlink"><span class="icon">🔍</span><span class="label">Pesquisa Geral</span></a></li>
+      <li><a href="../perfis/ver.html" class="navlink"><span class="icon">👑</span><span class="label">Perfil da Aura</span></a></li>
+      <li><a href="../people/ver.html" class="navlink"><span class="icon">🧍</span><span class="label">Pessoas</span></a></li>
+      <li><a href="../casos/ver.html" class="navlink"><span class="icon">📁</span><span class="label">Casos</span></a></li>
+      <li><a href="../investigacoes/ver.html" class="navlink"><span class="icon">🕵️</span><span class="label">Investigações</span></a></li>
+      <li><a href="../veiculos/ver.html" class="navlink"><span class="icon">🏎️</span><span class="label">Veículos</span></a></li>
+      <li><a href="../facc/ver.html" class="navlink"><span class="icon">⚔️</span><span class="label">Facções</span></a></li>
+      <li><a href="../perimetro/ver.html" class="navlink"><span class="icon">📍</span><span class="label">Perímetro de Ações</span></a></li>
+      <li><a href="../reunioes/ver.html" class="navlink"><span class="icon">🗓️</span><span class="label">Reuniões</span></a></li>
+
+      <!-- AQUI: removi o active do Regras CDA -->
+      <li><a href="../regras/ver.html" class="navlink"><span class="icon">📚</span><span class="label">Regras CDA</span></a></li>
+    </ul>
+
+    <button id="logoutBtn">Sair</button>
+  </div>
+
+  <!-- Conteúdo -->
+  <div class="main-content">
+    <div class="page-container">
+
+      <div class="top-row">
+        <div class="top-left">
+          <button class="btn-soft-aura" onclick="history.back()">←</button>
+          <h1 style="margin:0">📁 Casos</h1>
+        </div>
+
+        <div class="top-actions">
+          <a href="arquivados.html" class="btn-soft-aura">🗃 Arquivados</a>
+          <a id="btnNovoCaso" href="criar.html" class="btn-main-aura">➕ Novo Caso</a>
+        </div>
+      </div>
+
+      <div class="search-wrapper">
+        <span class="icon">🔍</span>
+        <input id="searchBar" placeholder="Pesquisar por título, responsável, pessoas, veículos ou facções...">
+      </div>
+
+      <div id="casesList" class="cases-list"></div>
+
+    </div>
+  </div>
+
+<script type="module">
+import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-app.js";
+import {
+  getFirestore, collection, onSnapshot, getDocs,
+  updateDoc, deleteDoc, doc, query, where
+} from "https://www.gstatic.com/firebasejs/10.13.1/firebase-firestore.js";
+import { firebaseConfig } from "../firebaseConfig.js";
+import { logAction } from "../utils/logger.js";
+
+
+const app = getApps().length ? getApps()[0] : initializeApp(firebaseConfig);
+const db  = getFirestore(app);
+
+const listEl = document.getElementById("casesList");
+const searchEl = document.getElementById("searchBar");
+
+/* =========================
+   CARGO (como tu queres)
+   - Admin: só perfis (não edita aqui)
+   - Investigador: pode criar/editar/arquivar/eliminar
+========================= */
+const role = (localStorage.getItem("userRole") || "").toLowerCase();
+const canEdit = role === "investigador";
+
+// sem role/logado -> volta
+if(!role){
+  location.href = "../select.html";
+}
+
+// esconder botão do topo se não for investigador
+if(!canEdit){
+  document.getElementById("btnNovoCaso")?.remove();
+}
+
+let allCases = [];
+
+/* ===== IDS -> Labels ===== */
+const peopleMap  = {};
+const vehicleMap = {};
+const factionMap = {};
+
+function labelFrom(docData, fallbackId){
+  return (
+    docData?.name ||
+    docData?.nome ||
+    docData?.titulo ||
+    docData?.modelo ||
+    docData?.placa ||
+    docData?.sigla ||
+    fallbackId
+  );
+}
+
+async function preloadMaps(){
+  try{
+    const pSnap = await getDocs(collection(db,"people"));
+    pSnap.forEach(d=> peopleMap[d.id] = labelFrom(d.data(), d.id));
+  }catch(e){}
+
+  try{
+    const vSnap = await getDocs(collection(db,"veiculos"));
+    vSnap.forEach(d=> vehicleMap[d.id] = labelFrom(d.data(), d.id));
+  }catch(e){}
+
+  try{
+    const fSnap = await getDocs(collection(db,"facc"));
+    fSnap.forEach(d=> factionMap[d.id] = labelFrom(d.data(), d.id));
+  }catch(e){}
+}
+
+function labelsFromIds(ids, map){
+  if(!Array.isArray(ids) || !ids.length) return [];
+  return ids.map(id => map[id] || id);
+}
+
+/* ===== Ghost overlay (global) ===== */
+function showGhostGlobal(){
+  const g = document.createElement("div");
+  g.className = "ghost-global";
+  g.innerHTML = `<img src="../fantasma_aura_sem_fundo.png" alt="A guardar...">`;
+  document.body.appendChild(g);
+  return g;
+}
+
+/* ===== Modal confirmar ===== */
+function confirmModal(title, text, okLabel="Confirmar"){
+  return new Promise(res=>{
+    const m=document.createElement("div");
+    m.className="modal-overlay";
+    m.innerHTML=`
+      <div class="modal-box">
+        <h3>${title}</h3>
+        <p>${text}</p>
+        <div class="modal-actions">
+          <button class="btn-soft-aura cancel">Cancelar</button>
+          <button class="btn-main-aura ok">${okLabel}</button>
+        </div>
+      </div>`;
+    document.body.appendChild(m);
+
+    const close = (v)=>{ m.remove(); res(v); };
+    m.querySelector(".cancel").onclick=()=>close(false);
+    m.querySelector(".ok").onclick=()=>close(true);
+    m.addEventListener("click",(e)=>{ if(e.target===m) close(false); });
+  });
+}
+
+/* ===== Modal VER ===== */
+function viewModal(c){
+  const people = labelsFromIds(c.people, peopleMap);
+  const vehicles = labelsFromIds(c.vehicles, vehicleMap);
+  const factions = labelsFromIds(c.factions, factionMap);
+
+  const m=document.createElement("div");
+  m.className="modal-overlay";
+  m.innerHTML=`
+    <div class="modal-box">
+      <h3>👁 ${c.title || "Sem título"}</h3>
+
+      <p><b>Responsável:</b> ${c.responsible || "-"}</p>
+
+      <div class="hr"></div>
+
+      <p><b>👥 Pessoas:</b> ${people.length ? people.join(", ") : "<span class='muted'>—</span>"}</p>
+      <p><b>🚗 Veículos:</b> ${vehicles.length ? vehicles.join(", ") : "<span class='muted'>—</span>"}</p>
+      <p><b>⚔️ Facções:</b> ${factions.length ? factions.join(", ") : "<span class='muted'>—</span>"}</p>
+
+      <div class="hr"></div>
+
+      <p><b>📎 Descrição:</b><br>${
+        (c.description || "").trim()
+          ? (c.description || "").replaceAll("\n","<br>")
+          : "<span class='muted'>—</span>"
+      }</p>
+
+      <div class="modal-actions">
+        <button class="btn-soft-aura close">Fechar</button>
+      </div>
+    </div>
+  `;
+
+  document.body.appendChild(m);
+  m.querySelector(".close").onclick=()=>m.remove();
+  m.addEventListener("click",(e)=>{ if(e.target===m) m.remove(); });
+}
+
+/* ===== Render ===== */
+function render(cases){
+  listEl.innerHTML = "";
+
+  if(!cases.length){
+    const empty = document.createElement("div");
+    empty.className = "case-row";
+    empty.innerHTML = `<div class="case-left"><h3 class="case-title">Nenhum caso encontrado</h3><p class="case-sub">Tenta outra pesquisa.</p></div>`;
+    listEl.appendChild(empty);
+    return;
+  }
+
+  cases.forEach(c=>{
+    const row = document.createElement("div");
+    row.className = "case-row";
+
+    const peopleCount  = Array.isArray(c.people) ? c.people.length : 0;
+    const vehicleCount = Array.isArray(c.vehicles) ? c.vehicles.length : 0;
+    const factionCount = Array.isArray(c.factions) ? c.factions.length : 0;
+
+    row.innerHTML = `
+      <div class="case-left">
+        <h3 class="case-title">${c.title || "Sem título"}</h3>
+        <p class="case-sub"><b>Responsável:</b> ${c.responsible || "-"}</p>
+      </div>
+
+      <div class="case-mid">
+        <span class="pill">👥 ${peopleCount} pessoas</span>
+        <span class="pill">🚗 ${vehicleCount} veículos</span>
+        <span class="pill">⚔️ ${factionCount} facções</span>
+        <span class="status">✅ Ativo</span>
+      </div>
+
+      <div class="case-actions">
+        <button class="btn-soft-aura viewBtn">👁 Ver</button>
+
+        ${canEdit ? `<a class="btn-soft-aura" href="editar.html?id=${c.id}">✏️ Editar</a>` : ""}
+        ${canEdit ? `<button class="btn-soft-aura archiveBtn">📦 Arquivar</button>` : ""}
+        ${canEdit ? `<button class="btn-danger-aura deleteBtn">🗑 Eliminar</button>` : ""}
+      </div>
+    `;
+
+    row.querySelector(".viewBtn").onclick = ()=> viewModal(c);
+
+    row.querySelector(".archiveBtn")?.addEventListener("click", async ()=>{
+      const ok = await confirmModal("Arquivar caso", "Este caso vai para Arquivados. Queres continuar?", "Arquivar");
+      if(!ok) return;
+
+      const g = showGhostGlobal();
+      try{
+        await updateDoc(doc(db,"cases",c.id), { archived:true });
+      }finally{
+        g.remove();
+      }
+    });
+
+    row.querySelector(".deleteBtn")?.addEventListener("click", async ()=>{
+      const ok = await confirmModal("Eliminar caso", "Esta ação é permanente. Queres eliminar mesmo?", "Eliminar");
+      if(!ok) return;
+
+      const g = showGhostGlobal();
+      try{
+        await deleteDoc(doc(db,"cases",c.id));
+      }finally{
+        g.remove();
+      }
+    });
+
+    listEl.appendChild(row);
+  });
+}
+
+/* ===== Pesquisa ===== */
+function applySearch(){
+  const q=(searchEl.value||"").toLowerCase().trim();
+  if(!q){ render(allCases); return; }
+
+  const filtered = allCases.filter(c=>{
+    const title = (c.title||"").toLowerCase();
+    const resp  = (c.responsible||"").toLowerCase();
+
+    const ppl   = labelsFromIds(c.people, peopleMap).join(", ").toLowerCase();
+    const veh   = labelsFromIds(c.vehicles, vehicleMap).join(", ").toLowerCase();
+    const fac   = labelsFromIds(c.factions, factionMap).join(", ").toLowerCase();
+
+    return title.includes(q) || resp.includes(q) || ppl.includes(q) || veh.includes(q) || fac.includes(q);
+  });
+
+  render(filtered);
+}
+searchEl.addEventListener("input", applySearch);
+
+/* ===== START ===== */
+await preloadMaps();
+
+/* sem orderBy para não esconder casos antigos */
+const qCases = query(collection(db,"cases"), where("archived","==",false));
+onSnapshot(qCases, (snap)=>{
+  allCases = snap.docs.map(d=>({id:d.id, ...d.data()}));
+
+  allCases.sort((a,b)=>{
+    const aT = a.createdAt?.seconds || 0;
+    const bT = b.createdAt?.seconds || 0;
+    if(bT !== aT) return bT - aT;
+    return (a.title||"").localeCompare(b.title||"", "pt");
+  });
+
+  applySearch();
+});
+</script>
+
+<script>
+(function(){
+  const el = document.getElementById("agentNameDisplay");
+  if(el) el.textContent = `Agente: ${localStorage.getItem("selectedAgent") || "Desconhecido"}`;
+
+  const logout = document.getElementById("logoutBtn");
+  if(logout){
+    logout.onclick = ()=>{
+      ["username","selectedAgent","userRole","userCode","isAdmin"]
+        .forEach(k=>localStorage.removeItem(k));
+      location.href="../select.html";
+    };
+  }
+})();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="UTF-8">
+<title>Sistema AURA — Facções</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<link rel="icon" href="../Aurinha.png">
+<link rel="stylesheet" href="../style.css">
+
+<style>
+a{ text-decoration:none !important; }
+
+.topbar{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:14px;
+  flex-wrap:wrap;
+}
+
+.btn-create{
+  padding:.65rem 1.1rem;
+  border-radius:16px;
+  background:linear-gradient(135deg,#7c3aed,#9333ea);
+  color:#fff;
+  font-weight:900;
+  border:none;
+  cursor:pointer;
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  box-shadow:0 0 20px rgba(124,58,237,.35);
+}
+.btn-create:hover{ filter:brightness(1.07); }
+
+.search-bar{
+  width:100%;
+  padding:1rem 1.1rem;
+  border-radius:16px;
+  background:rgba(40,20,60,.55);
+  border:1px solid rgba(160,120,255,.25);
+  color:#fff;
+  margin:1rem 0;
+}
+
+.facc-card{
+  background:rgba(40,20,60,.45);
+  border:1px solid rgba(160,120,255,.25);
+  border-radius:20px;
+  padding:1.4rem;
+  margin-bottom:1.4rem;
+  display:flex;
+  align-items:center;
+  gap:20px;
+  backdrop-filter:blur(14px);
+}
+
+.facc-logo{
+  width:72px;
+  height:72px;
+  border-radius:18px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-weight:900;
+  color:white;
+  font-size:1.3rem;
+  flex-shrink:0;
+  overflow:hidden;
+}
+
+.facc-logo img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+}
+
+.facc-info{ flex:1; }
+
+.facc-info h3{
+  margin:0;
+  color:#e9d5ff;
+}
+
+.facc-info p{
+  margin:3px 0;
+  font-size:.9rem;
+  opacity:.9;
+}
+
+.badge{
+  display:inline-block;
+  background:rgba(124,58,237,.35);
+  padding:.25rem .7rem;
+  border-radius:999px;
+  font-size:.75rem;
+  margin-right:6px;
+}
+
+.facc-actions{
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+}
+
+.btn{
+  padding:.55rem 1.1rem;
+  border-radius:14px;
+  border:none;
+  cursor:pointer;
+  font-weight:700;
+  color:white;
+  background:rgba(124,58,237,.35);
+  transition:.2s;
+  text-align:center;
+}
+
+.btn:hover{ background:rgba(124,58,237,.55); }
+
+.btn-main{
+  background:linear-gradient(135deg,#7c3aed,#9333ea);
+}
+</style>
+</head>
+
+<body>
+
+<div class="sidebar">
+  <h2 class="logo">SISTEMA AURA</h2>
+  <span id="agentNameDisplay"></span>
+
+    <ul>
+      <li><a href="../dashboard.html" class="navlink active"><span class="icon">🏠</span><span class="label">Dashboard</span></a></li>
+      <li><a href="../pesquisa/ver.html" class="navlink"><span class="icon">🔍</span><span class="label">Pesquisa Geral</span></a></li>
+      <li><a href="../perfis/ver.html" class="navlink"><span class="icon">👑</span><span class="label">Perfil da Aura</span></a></li>
+      <li><a href="../people/ver.html" class="navlink"><span class="icon">🧍</span><span class="label">Pessoas</span></a></li>
+      <li><a href="../casos/ver.html" class="navlink"><span class="icon">📁</span><span class="label">Casos</span></a></li>
+      <li><a href="../investigacoes/ver.html" class="navlink"><span class="icon">🕵️</span><span class="label">Investigações</span></a></li>
+      <li><a href="../veiculos/ver.html" class="navlink"><span class="icon">🏎️</span><span class="label">Veículos</span></a></li>
+      <li><a href="facc/ver.html" class="navlink"><span class="icon">⚔️</span><span class="label">Facções</span></a></li>
+      <li><a href="../perimetro/ver.html" class="navlink"><span class="icon">📍</span><span class="label">Perímetro de Ações</span></a></li>
+      <li><a href="../reunioes/ver.html" class="navlink"><span class="icon">🗓️</span><span class="label">Reuniões</span></a></li>
+
+      <!-- AQUI: removi o active do Regras CDA -->
+      <li><a href="../regras/ver.html" class="navlink"><span class="icon">📚</span><span class="label">Regras CDA</span></a></li>
+    </ul>
+
+    <button id="logoutBtn">Sair</button>
+  </div>
+
+<div class="main-content">
+<div class="page-container">
+
+<div class="topbar">
+  <h1>⚔️ Facções</h1>
+  <a class="btn-create edit-only" href="criar.html">➕ Nova Facção</a>
+</div>
+
+<input id="search" class="search-bar" placeholder="Pesquisar por nome, líder ou membro...">
+
+<div id="list"></div>
+
+</div>
+</div>
+
+<script type="module">
+import { initializeApp,getApps } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-app.js";
+import { getFirestore,collection,onSnapshot,getDocs } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-firestore.js";
+import { firebaseConfig } from "../firebaseConfig.js";
+import { logAction } from "../utils/logger.js";
+
+
+/* ===== CONTROLO DE ACESSO ===== */
+const role = localStorage.getItem("userRole");
+const canEdit = role === "investigador";
+
+if (!role) {
+  location.href = "../select.html";
+}
+
+/* ===== FIREBASE ===== */
+const app = getApps().length ? getApps()[0] : initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+/* ===== PESSOAS ===== */
+const peopleSnap = await getDocs(collection(db,"people"));
+const people = {};
+peopleSnap.forEach(p => people[p.id] = p.data().name);
+
+/* ===== UI ===== */
+const list = document.getElementById("list");
+const search = document.getElementById("search");
+
+let faccs = [];
+
+onSnapshot(collection(db,"facc"), snap => {
+  faccs = snap.docs.map(d => ({ id:d.id, ...d.data() }));
+  render();
+});
+
+function render(){
+  const q = search.value.toLowerCase();
+  list.innerHTML = "";
+
+  faccs
+  .filter(f => {
+    const text = [
+      f.nome,
+      f.sigla,
+      people[f.hierarquia?.o1],
+      people[f.hierarquia?.o2],
+      people[f.hierarquia?.o3],
+      ...(f.hierarquia?.membros || []).map(id => people[id])
+    ].join(" ").toLowerCase();
+    return text.includes(q);
+  })
+  .forEach(f => {
+
+    const o1 = people[f.hierarquia?.o1] || "-";
+    const o2 = people[f.hierarquia?.o2] || "-";
+    const o3 = people[f.hierarquia?.o3] || "-";
+    const membros = f.hierarquia?.membros?.length || 0;
+
+    const card = document.createElement("div");
+    card.className = "facc-card";
+
+    const avatar = f.faccFoto
+      ? `<img src="${f.faccFoto}">`
+      : `<div style="background:${f.cor || '#7c3aed'};width:100%;height:100%;display:flex;align-items:center;justify-content:center">${(f.sigla || f.nome).slice(0,3)}</div>`;
+
+    card.innerHTML = `
+      <div class="facc-logo">${avatar}</div>
+
+      <div class="facc-info">
+        <h3>${f.nome}</h3>
+        <p><span class="badge">👑 01</span> ${o1}</p>
+        <p><span class="badge">🥈 02</span> ${o2}</p>
+        <p><span class="badge">🥉 03</span> ${o3}</p>
+        <p><span class="badge">👥 ${membros} membros</span></p>
+      </div>
+
+      <div class="facc-actions">
+        <a class="btn" href="ver_detalhes.html?id=${f.id}">👁️ Ver</a>
+        <a class="btn btn-main edit-only" href="editar.html?id=${f.id}">✏️ Editar</a>
+      </div>
+    `;
+
+    list.appendChild(card);
+  });
+
+  // esconder ações se não for investigador
+  if (!canEdit) {
+    document.querySelectorAll(".edit-only").forEach(el => {
+      el.style.display = "none";
+    });
+  }
+}
+
+search.oninput = render;
+</script>
+
+<script>
+logoutBtn.onclick=()=>{
+  ["username","selectedAgent","userRole","userCode","isAdmin"]
+    .forEach(k=>localStorage.removeItem(k));
+  location.href="../select.html";
+};
+</script>
+
+</body>
+</html>

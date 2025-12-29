@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Bem-vindo ao Sistema AURA 💜</title>
+
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background-color: #0d001a;
+      overflow: hidden;
+      font-family: 'Poppins', sans-serif;
+    }
+
+    .background {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 100vw;
+      height: 100vh;
+      background: url("fantasma_aura_sem_fundo.png") no-repeat center center;
+      background-size: contain;
+      opacity: 0.20;
+      animation: pulse 5s infinite ease-in-out;
+    }
+
+    @keyframes pulse {
+      0%, 100% { transform: translate(-50%, -50%) scale(1); }
+      50% { transform: translate(-50%, -50%) scale(1.04); }
+    }
+
+    .content {
+      position: relative;
+      text-align: center;
+      z-index: 1;
+    }
+
+    h1 {
+      color: white;
+      font-size: 2.5rem;
+      text-shadow: 0 0 12px rgba(180,107,255,0.6);
+    }
+
+    .btn-entrar {
+      margin-top: 2rem;
+      padding: 1rem 2.5rem;
+      font-size: 1.2rem;
+      font-weight: bold;
+      color: white;
+      background: #b46bff;
+      border: none;
+      border-radius: 50px;
+      box-shadow: 0 0 20px rgba(180,107,255,0.6);
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .btn-entrar:hover {
+      background: #9f4dff;
+      box-shadow: 0 0 30px rgba(180,107,255,0.8);
+      transform: scale(1.05);
+    }
+  </style>
+</head>
+<body>
+  <div class="background"></div>
+  <div class="content">
+    <h1>Bem-vindo ao Sistema AURA 💜<br><small style="font-size: 1rem; opacity: 0.7">Investigações, ação e regras em um só lugar</small></h1>
+    <button class="btn-entrar" onclick="entrar()">Entrar</button>
+  </div>
+
+  <script>
+    function entrar() {
+      document.querySelector('.content').style.opacity = 0;
+      setTimeout(() => window.location.href = "select.html", 500);
+    }
+  </script>
+</body>
+</html>

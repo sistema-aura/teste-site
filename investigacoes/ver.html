@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="UTF-8">
+<title>Investigações — Sistema AURA</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<link rel="icon" href="../Aurinha.png">
+<link rel="stylesheet" href="../style.css">
+
+<style>
+a{text-decoration:none!important}
+
+/* SIDEBAR */
+.sidebar ul li a{display:flex;align-items:center;gap:10px}
+.sidebar .icon{width:22px;opacity:.9}
+.agent-display{font-size:.85rem;opacity:.85;margin:0 0 12px}
+
+/* TOP */
+.top-row{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:1rem}
+.top-left{display:flex;align-items:center;gap:10px}
+.top-actions{display:flex;gap:10px}
+
+/* BOTÕES */
+.btn-soft-aura{
+  background:rgba(180,107,255,.18);
+  border:1px solid rgba(180,107,255,.35);
+  border-radius:14px;
+  padding:.6rem 1.2rem;
+  font-weight:800;
+  color:#fff;
+  cursor:pointer;
+}
+.btn-soft-aura:hover{background:rgba(180,107,255,.28)}
+
+.btn-main-aura{
+  background:linear-gradient(135deg,#a855f7,#7c3aed);
+  border:none;
+  border-radius:14px;
+  padding:.65rem 1.4rem;
+  font-weight:900;
+  color:#fff;
+  cursor:pointer;
+}
+
+.btn-danger-aura{
+  background:linear-gradient(135deg,#ff4d6d,#ff7c6b);
+  border:none;
+  border-radius:14px;
+  padding:.6rem 1.2rem;
+  font-weight:900;
+  color:#fff;
+}
+
+/* SEARCH */
+.search-wrapper{
+  position:relative;
+  margin:.3rem 0 1.2rem;
+}
+.search-wrapper input{
+  width:100%;
+  padding:.85rem 1rem .85rem 2.8rem;
+  border-radius:14px;
+  background:rgba(0,0,0,.35);
+  border:1px solid rgba(255,255,255,.12);
+  color:#fff;
+}
+
+/* LISTA */
+.cases-list{display:flex;flex-direction:column;gap:14px}
+
+.case-row{
+  background:rgba(255,255,255,.06);
+  border:1px solid rgba(255,255,255,.08);
+  border-radius:18px;
+  padding:1.2rem;
+  display:flex;
+  justify-content:space-between;
+  flex-wrap:wrap;
+  gap:16px;
+}
+
+.case-title{font-size:1.1rem;font-weight:900}
+.case-sub{opacity:.85}
+
+.case-mid{display:flex;gap:10px;flex-wrap:wrap}
+
+.pill{
+  background:rgba(168,85,247,.18);
+  border:1px solid rgba(168,85,247,.3);
+  padding:.4rem .7rem;
+  border-radius:999px;
+  font-weight:800;
+}
+
+.case-actions{display:flex;gap:10px;flex-wrap:wrap}
+
+/* MODAL */
+.modal-overlay{
+  position:fixed;
+  inset:0;
+  background:rgba(15,10,30,.75);
+  backdrop-filter:blur(8px);
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  z-index:9999;
+}
+.modal-box{
+  background:rgba(30,0,60,.95);
+  border-radius:18px;
+  padding:1.4rem;
+  width:min(500px,90%);
+}
+.modal-box h3{margin-top:0}
+
+/* GHOST */
+.ghost-global{
+  position:fixed;
+  inset:0;
+  background:rgba(15,10,30,.75);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  z-index:99999;
+}
+.ghost-global img{
+  width:160px;
+  animation:float 2.5s ease-in-out infinite;
+}
+@keyframes float{
+  0%{transform:translateY(0)}
+  50%{transform:translateY(-12px)}
+  100%{transform:translateY(0)}
+}
+</style>
+</head>
+
+<body>
+
+<div class="sidebar">
+  <h2 class="logo">SISTEMA AURA</h2>
+  <span id="agentNameDisplay"></span>
+
+    <ul>
+      <li><a href="../dashboard.html" class="navlink active"><span class="icon">🏠</span><span class="label">Dashboard</span></a></li>
+      <li><a href="../pesquisa/ver.html" class="navlink"><span class="icon">🔍</span><span class="label">Pesquisa Geral</span></a></li>
+      <li><a href="../perfis/ver.html" class="navlink"><span class="icon">👑</span><span class="label">Perfil da Aura</span></a></li>
+      <li><a href="../people/ver.html" class="navlink"><span class="icon">🧍</span><span class="label">Pessoas</span></a></li>
+      <li><a href="../casos/ver.html" class="navlink"><span class="icon">📁</span><span class="label">Casos</span></a></li>
+      <li><a href="../investigacoes/ver.html" class="navlink"><span class="icon">🕵️</span><span class="label">Investigações</span></a></li>
+      <li><a href="../veiculos/ver.html" class="navlink"><span class="icon">🏎️</span><span class="label">Veículos</span></a></li>
+      <li><a href="../facc/ver.html" class="navlink"><span class="icon">⚔️</span><span class="label">Facções</span></a></li>
+      <li><a href="../perimetro/ver.html" class="navlink"><span class="icon">📍</span><span class="label">Perímetro de Ações</span></a></li>
+      <li><a href="../reunioes/ver.html" class="navlink"><span class="icon">🗓️</span><span class="label">Reuniões</span></a></li>
+
+      <!-- AQUI: removi o active do Regras CDA -->
+      <li><a href="../regras/ver.html" class="navlink"><span class="icon">📚</span><span class="label">Regras CDA</span></a></li>
+    </ul>
+
+    <button id="logoutBtn">Sair</button>
+  </div>
+
+<div class="main-content">
+  <div class="page-container">
+
+    <div class="top-row">
+      <div class="top-left">
+        <button class="btn-soft-aura" onclick="history.back()">←</button>
+        <h1>🕵️ Investigações</h1>
+      </div>
+
+      <div class="top-actions">
+        <a id="btnNovo" href="criar.html" class="btn-main-aura">➕ Nova Investigação</a>
+      </div>
+    </div>
+
+    <div class="search-wrapper">
+      <input id="searchBar" placeholder="Pesquisar investigação...">
+    </div>
+
+    <div id="casesList" class="cases-list"></div>
+
+  </div>
+</div>
+
+<script type="module">
+import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-app.js";
+import { getFirestore, collection, query, where, onSnapshot, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-firestore.js";
+import { firebaseConfig } from "../firebaseConfig.js";
+import { logAction } from "../utils/logger.js";
+
+
+const app = getApps().length ? getApps()[0] : initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+const role = (localStorage.getItem("userRole") || "").toLowerCase();
+const canEdit = role === "investigador";
+
+if(!canEdit) document.getElementById("btnNovo")?.remove();
+
+const list = document.getElementById("casesList");
+const search = document.getElementById("searchBar");
+
+function ghost(){
+  const g=document.createElement("div");
+  g.className="ghost-global";
+  g.innerHTML=`<img src="../fantasma_aura_sem_fundo.png">`;
+  document.body.appendChild(g);
+  return g;
+}
+
+function render(data){
+  list.innerHTML="";
+  data.forEach(c=>{
+    const row=document.createElement("div");
+    row.className="case-row";
+
+    row.innerHTML=`
+      <div>
+        <h3 class="case-title">${c.titulo||"Sem título"}</h3>
+        <p class="case-sub"><b>Responsável:</b> ${c.responsavel||"-"}</p>
+      </div>
+
+      <div class="case-mid">
+        <span class="pill">👥 ${(c.envolvidos||[]).length}</span>
+        <span class="pill">🚗 ${(c.veiculos||[]).length}</span>
+        <span class="pill">⚔️ ${(c.faccoes||[]).length}</span>
+      </div>
+
+      <div class="case-actions">
+        <button class="btn-soft-aura" onclick="view('${c.id}')">👁 Ver</button>
+        ${canEdit ? `<a class="btn-soft-aura" href="editar.html?id=${c.id}">✏️ Editar</a>` : ""}
+        ${canEdit ? `<button class="btn-danger-aura" onclick="del('${c.id}')">🗑</button>` : ""}
+      </div>
+    `;
+
+    list.appendChild(row);
+  });
+}
+
+window.view = id => {
+  const c = all.find(x=>x.id===id);
+  if(!c) return;
+
+  const modal = document.createElement("div");
+  modal.className = "modal-overlay";
+  modal.innerHTML = `
+    <div class="modal-box">
+      <h3>${c.titulo || "Sem título"}</h3>
+      <p><b>Responsável:</b> ${c.responsavel || "-"}</p>
+      <hr>
+      <p><b>👥 Pessoas:</b> ${(c.envolvidos||[]).join(", ") || "-"}</p>
+      <p><b>🚗 Veículos:</b> ${(c.veiculos||[]).join(", ") || "-"}</p>
+      <p><b>⚔️ Facções:</b> ${(c.faccoes||[]).join(", ") || "-"}</p>
+      <hr>
+      <p>${(c.descricao||"").replaceAll("\n","<br>")}</p>
+      <div style="text-align:right;margin-top:10px">
+        <button class="btn-soft-aura close">Fechar</button>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(modal);
+
+  modal.querySelector(".close").onclick = ()=>modal.remove();
+  modal.onclick = e => { if(e.target === modal) modal.remove(); };
+};
+
+window.del = async id => {
+  if(!confirm("Eliminar investigação?")) return;
+  const g = ghost();
+  await deleteDoc(doc(db,"investigacoes",id));
+  g.remove();
+  await logAction("apagou", "caso", title.value.trim());
+};
+
+search.addEventListener("input",()=>{
+  const q = search.value.toLowerCase();
+  render(all.filter(c => (c.titulo||"").toLowerCase().includes(q)));
+});
+
+let all = [];
+
+const q = query(collection(db,"investigacoes"), where("estado","==","ativo"));
+onSnapshot(q,snap=>{
+  all = snap.docs.map(d=>({id:d.id,...d.data()}));
+  render(all);
+});
+
+document.getElementById("agentNameDisplay").innerText =
+  "Agente: " + (localStorage.getItem("selectedAgent") || "-");
+
+document.getElementById("logoutBtn").onclick=()=>{
+  ["username","selectedAgent","userRole","userCode","isAdmin"].forEach(k=>localStorage.removeItem(k));
+  location.href="../select.html";
+};
+</script>
+
+</body>
+</html>

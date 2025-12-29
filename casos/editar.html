@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8">
+  <title>Editar Caso — Sistema AURA</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <link rel="icon" href="../Aurinha.png">
+  <link rel="stylesheet" href="../style.css">
+
+  <!-- === CSS IGUAL AO CRIAR === -->
+  <style>
+    .form-card{
+      max-width:1000px;
+      margin:0 auto;
+      background:rgba(255,255,255,.06);
+      border:1px solid rgba(255,255,255,.08);
+      border-radius:18px;
+      padding:1.6rem 1.8rem;
+      box-shadow:0 18px 40px rgba(180,107,255,.18);
+    }
+
+    .section{ margin-top:1.4rem; }
+    .section h3{ margin:0 0 .7rem; font-size:1rem; }
+
+    .form-grid{
+      display:grid;
+      grid-template-columns:repeat(auto-fit,minmax(240px,1fr));
+      gap:14px;
+    }
+
+    .form-group label{
+      display:block;
+      font-size:.85rem;
+      opacity:.85;
+      margin-bottom:4px;
+    }
+
+    .form-group input, textarea{
+      width:100%;
+      padding:.75rem .9rem;
+      border-radius:12px;
+      background:rgba(0,0,0,.25);
+      border:1px solid rgba(255,255,255,.08);
+      color:#fff;
+      outline:none;
+    }
+
+    textarea{ resize:vertical; }
+
+    .relation-block{
+      background:rgba(180,107,255,.06);
+      border:1px solid rgba(180,107,255,.18);
+      border-radius:16px;
+      padding:1rem 1.1rem;
+      margin-top:1.2rem;
+    }
+
+    .relation-header{
+      display:flex;
+      align-items:center;
+      gap:8px;
+      font-weight:800;
+      font-size:.95rem;
+      margin-bottom:.6rem;
+      color:#e9d5ff;
+    }
+
+    .search-wrapper{ position:relative; }
+    .search-wrapper input{
+      width:100%;
+      padding:.75rem 1rem .75rem 2.6rem;
+      border-radius:14px;
+      background:rgba(0,0,0,.35);
+      border:1px solid rgba(255,255,255,.12);
+      color:#fff;
+      font-size:.85rem;
+    }
+
+    .search-wrapper .icon{
+      position:absolute;
+      left:.9rem;
+      top:50%;
+      transform:translateY(-50%);
+      opacity:.7;
+      pointer-events:none;
+    }
+
+    .autocomplete-list{
+      position:absolute;
+      top:100%;
+      left:0;
+      right:0;
+      background:rgba(30,0,60,.98);
+      border-radius:12px;
+      margin-top:4px;
+      max-height:180px;
+      overflow-y:auto;
+      display:none;
+      z-index:9999;
+    }
+
+    .autocomplete-item{
+      padding:.55rem .7rem;
+      cursor:pointer;
+      font-size:.8rem;
+    }
+    .autocomplete-item:hover{
+      background:rgba(180,107,255,.22);
+    }
+
+    .chip-list{
+      display:flex;
+      flex-wrap:wrap;
+      gap:8px;
+      margin-top:10px;
+    }
+
+    .chip{
+      display:flex;
+      align-items:center;
+      gap:6px;
+      padding:.35rem .6rem;
+      border-radius:999px;
+      background:rgba(168,85,247,.25);
+      border:1px solid rgba(168,85,247,.35);
+      font-size:.75rem;
+      font-weight:700;
+    }
+
+    .chip button{
+      border:none;
+      background:none;
+      color:#fff;
+      cursor:pointer;
+      font-weight:900;
+    }
+
+    .actions{
+      display:flex;
+      justify-content:space-between;
+      gap:10px;
+      margin-top:1.8rem;
+      flex-wrap:wrap;
+    }
+
+    .btn-save{
+      background:linear-gradient(135deg,#a855f7,#7c3aed);
+      border:none;
+      border-radius:14px;
+      padding:.75rem 1.6rem;
+      font-weight:800;
+      color:#fff;
+      cursor:pointer;
+    }
+
+    .btn-soft{
+      background:rgba(180,107,255,.18);
+      border:1px solid rgba(180,107,255,.35);
+      border-radius:14px;
+      padding:.6rem 1.2rem;
+      color:#fff;
+      cursor:pointer;
+    }
+
+    .btn-danger{
+      background:linear-gradient(135deg,#ff4d6d,#ff7c6b);
+      border:none;
+      border-radius:14px;
+      padding:.6rem 1.2rem;
+      color:#fff;
+      cursor:pointer;
+    }
+
+    /* 👻 Ghost */
+    .ghost-overlay{
+      position:fixed;
+      inset:0;
+      background:rgba(20,0,40,.55);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      z-index:9999;
+      backdrop-filter:blur(6px);
+    }
+
+    .ghost-overlay img{
+      width:350px;
+      animation:ghostFloat 1.6s ease-in-out infinite,
+               ghostSpin 2.8s linear infinite;
+    }
+
+    @keyframes ghostFloat{
+      50%{ transform:translateY(-12px); }
+    }
+    @keyframes ghostSpin{
+      to{ rotate:360deg; }
+    }
+  </style>
+</head>
+
+<body>
+
+<div class="sidebar">
+  <h2 class="logo">SISTEMA AURA</h2>
+  <span id="agentNameDisplay" class="agent-display">Agente: -</span>
+    <ul>
+      <li><a href="../dashboard.html" class="navlink active"><span class="icon">🏠</span><span class="label">Dashboard</span></a></li>
+      <li><a href="../pesquisa/ver.html" class="navlink"><span class="icon">🔍</span><span class="label">Pesquisa Geral</span></a></li>
+      <li><a href="../perfis/ver.html" class="navlink"><span class="icon">👑</span><span class="label">Perfil da Aura</span></a></li>
+      <li><a href="../people/ver.html" class="navlink"><span class="icon">🧍</span><span class="label">Pessoas</span></a></li>
+      <li><a href="../casos/ver.html" class="navlink"><span class="icon">📁</span><span class="label">Casos</span></a></li>
+      <li><a href="../investigacoes/ver.html" class="navlink"><span class="icon">🕵️</span><span class="label">Investigações</span></a></li>
+      <li><a href="../veiculos/ver.html" class="navlink"><span class="icon">🏎️</span><span class="label">Veículos</span></a></li>
+      <li><a href="../facc/ver.html" class="navlink"><span class="icon">⚔️</span><span class="label">Facções</span></a></li>
+      <li><a href="../perimetro/ver.html" class="navlink"><span class="icon">📍</span><span class="label">Perímetro de Ações</span></a></li>
+      <li><a href="../reunioes/ver.html" class="navlink"><span class="icon">🗓️</span><span class="label">Reuniões</span></a></li>
+
+      <!-- AQUI: removi o active do Regras CDA -->
+      <li><a href="../regras/ver.html" class="navlink"><span class="icon">📚</span><span class="label">Regras CDA</span></a></li>
+    </ul>
+
+    <button id="logoutBtn">Sair</button>
+  </div>
+
+<div class="main-content">
+  <div class="page-container">
+
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:1rem">
+      <button class="btn-soft" onclick="history.back()">←</button>
+      <h1>✏️ Editar Caso</h1>
+    </div>
+
+    <form id="editForm" class="form-card">
+
+      <div class="section">
+        <h3>🧾 Identificação</h3>
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Título</label>
+            <input id="title" required>
+          </div>
+          <div class="form-group">
+            <label>Responsável</label>
+            <input id="responsible">
+          </div>
+        </div>
+      </div>
+
+      <!-- 👥 Pessoas -->
+      <div class="relation-block">
+        <div class="relation-header">👥 Pessoas Envolvidas</div>
+        <div class="search-wrapper">
+          <span class="icon">🔍</span>
+          <input id="peopleSearch">
+          <div id="peopleAuto" class="autocomplete-list"></div>
+        </div>
+        <div id="peopleChips" class="chip-list"></div>
+      </div>
+
+      <!-- 🚗 Veículos -->
+      <div class="relation-block">
+        <div class="relation-header">🚗 Veículos Envolvidos</div>
+        <div class="search-wrapper">
+          <span class="icon">🔍</span>
+          <input id="vehicleSearch">
+          <div id="vehicleAuto" class="autocomplete-list"></div>
+        </div>
+        <div id="vehicleChips" class="chip-list"></div>
+      </div>
+
+      <!-- ⚔️ Facções -->
+      <div class="relation-block">
+        <div class="relation-header">⚔️ Facções Envolvidas</div>
+        <div class="search-wrapper">
+          <span class="icon">🔍</span>
+          <input id="factionSearch">
+          <div id="factionAuto" class="autocomplete-list"></div>
+        </div>
+        <div id="factionChips" class="chip-list"></div>
+      </div>
+
+      <div class="section">
+        <h3>📎 Descrição</h3>
+        <textarea id="description" rows="6"></textarea>
+      </div>
+
+      <div class="actions">
+        <div>
+          <button type="button" id="archiveBtn" class="btn-soft">📦 Arquivar</button>
+          <button type="button" id="deleteBtn" class="btn-danger">🗑 Eliminar</button>
+        </div>
+        <button type="submit" id="saveBtn" class="btn-save">👻 Guardar Alterações</button>
+      </div>
+
+    </form>
+
+  </div>
+</div>
+
+<script type="module">
+import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-app.js";
+import {
+  getFirestore, doc, getDoc, updateDoc, deleteDoc,
+  collection, getDocs
+} from "https://www.gstatic.com/firebasejs/10.13.1/firebase-firestore.js";
+import { firebaseConfig } from "../firebaseConfig.js";
+import { logAction } from "../utils/logger.js";
+
+
+const app = getApps().length ? getApps()[0] : initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+const id = new URLSearchParams(location.search).get("id");
+if(!id) location.href="ver.html";
+
+const snap = await getDoc(doc(db,"cases",id));
+if(!snap.exists()) location.href="ver.html";
+const data = snap.data();
+
+title.value = data.title||"";
+responsible.value = data.responsible||"";
+description.value = data.description||"";
+
+const selected = {
+  people: data.people||[],
+  vehicles: data.vehicles||[],
+  factions: data.factions||[]
+};
+
+function showGhost(){
+  const g=document.createElement("div");
+  g.className="ghost-overlay";
+  g.innerHTML=`<img src="../fantasma_aura_sem_fundo.png">`;
+  document.body.appendChild(g);
+  return g;
+}
+
+/* === AUTOCOMPLETE COMPLETO (IGUAL AO CRIAR) === */
+function setupSearch(inputId, autoId, chipsId, col, key, labelFn, chipFn){
+  const input=document.getElementById(inputId);
+  const auto=document.getElementById(autoId);
+  const chips=document.getElementById(chipsId);
+  let items=[];
+
+  getDocs(collection(db,col)).then(s=>{
+    items=s.docs.map(d=>({id:d.id,...d.data()}));
+
+    // preload chips
+    selected[key].forEach(id=>{
+      const item=items.find(i=>i.id===id);
+      if(item) addChip(item);
+    });
+  });
+
+  function addChip(item){
+    if(!selected[key].includes(item.id)){
+      selected[key].push(item.id);
+    }
+
+    const chip=document.createElement("span");
+    chip.className="chip";
+    chip.innerHTML=`${chipFn(item)} <button>×</button>`;
+    chip.querySelector("button").onclick=()=>{
+      selected[key]=selected[key].filter(i=>i!==item.id);
+      chip.remove();
+    };
+    chips.appendChild(chip);
+    auto.style.display="none";
+    input.value="";
+  }
+
+  input.addEventListener("input",()=>{
+    const q=input.value.toLowerCase();
+    auto.innerHTML="";
+    if(!q){ auto.style.display="none"; return; }
+
+    items.filter(i=>labelFn(i).toLowerCase().includes(q))
+      .slice(0,8)
+      .forEach(i=>{
+        const d=document.createElement("div");
+        d.className="autocomplete-item";
+        d.textContent=labelFn(i);
+        d.onclick=()=>addChip(i);
+        auto.appendChild(d);
+      });
+
+    auto.style.display=auto.children.length?"block":"none";
+  });
+}
+
+setupSearch("peopleSearch","peopleAuto","peopleChips","people","people",
+  p=>p.name||"Sem nome",p=>p.name||"Sem nome");
+
+setupSearch("vehicleSearch","vehicleAuto","vehicleChips","veiculos","vehicles",
+  v=>`${v.placa}${v.modelo?" — "+v.modelo:""}`,v=>v.placa);
+
+setupSearch("factionSearch","factionAuto","factionChips","facc","factions",
+  f=>`${f.nome}${f.sigla?" ("+f.sigla+")":""}`,f=>f.nome);
+
+editForm.onsubmit = async e=>{
+  e.preventDefault();
+  const g=showGhost();
+  await updateDoc(doc(db,"cases",id),{
+    title:title.value.trim(),
+    responsible:responsible.value.trim(),
+    description:description.value.trim(),
+    people:selected.people,
+    vehicles:selected.vehicles,
+    factions:selected.factions
+  });
+  location.href="ver.html";
+
+await logAction("editou", "caso", title.value.trim());
+};
+
+archiveBtn.onclick = async ()=>{
+  const g=showGhost();
+  await updateDoc(doc(db,"cases",id),{archived:true});
+  location.href="ver.html";
+
+await logAction("editou", "caso", title.value.trim());
+};
+
+deleteBtn.onclick = async ()=>{
+  if(!confirm("Eliminar definitivamente?")) return;
+  const g=showGhost();
+  await deleteDoc(doc(db,"cases",id));
+  location.href="ver.html";
+  await logAction("apagou", "caso", title.value.trim());
+};
+</script>
+
+<script>
+agentNameDisplay.textContent=`Agente: ${localStorage.getItem("selectedAgent")||"Desconhecido"}`;
+logoutBtn.onclick=()=>{
+  ["username","selectedAgent","userRole","userCode","isAdmin"]
+    .forEach(k=>localStorage.removeItem(k));
+  location.href="../select.html";
+};
+</script>
+
+</body>
+</html>

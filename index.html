@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sistema AURA 💜 — Login</title>
+  <link rel="icon" href="Aurinha.png" />
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    body {
+      background: radial-gradient(circle at top left, #3c0064, #150026);
+      color: white;
+      font-family: 'Poppins', sans-serif;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      margin: 0;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .ghost {
+      position: absolute;
+      width: 600px;
+      opacity: 0.20;
+      z-index: 0;
+      animation: floatGhost 20s linear infinite alternate, pulseGlow 5s ease-in-out infinite;
+      pointer-events: none;
+    }
+
+    @keyframes floatGhost {
+      0% { top: 10%; left: -15%; transform: rotate(0deg); }
+      50% { top: 40%; left: 70%; transform: rotate(10deg); }
+      100% { top: 5%; left: 85%; transform: rotate(-8deg); }
+    }
+
+    @keyframes pulseGlow {
+      0%, 100% { filter: drop-shadow(0 0 6px rgba(180, 107, 255, 0.3)); }
+      50% { filter: drop-shadow(0 0 20px rgba(180, 107, 255, 0.6)); }
+    }
+
+    .login-container {
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 20px;
+      box-shadow: 0 0 25px rgba(180,107,255,0.3);
+      padding: 2.5rem 3rem;
+      text-align: center;
+      backdrop-filter: blur(12px);
+      width: 400px;
+      z-index: 1;
+    }
+
+    input[type="password"] {
+      width: 100%;
+      padding: 0.8rem;
+      border-radius: 10px;
+      border: none;
+      background: rgba(255,255,255,0.1);
+      color: white;
+      font-size: 1rem;
+      outline: none;
+      box-shadow: 0 0 10px rgba(180,107,255,0.2);
+      margin-bottom: 1.2rem;
+      text-align: center;
+    }
+
+    .checkbox {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 1rem;
+      font-size: 0.9rem;
+    }
+
+    .checkbox input {
+      margin-right: 0.5rem;
+    }
+
+    button {
+      width: 100%;
+      padding: 0.8rem;
+      background: #b46bff;
+      border: none;
+      border-radius: 10px;
+      color: white;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+
+    button:hover {
+      background: #9f4dff;
+      box-shadow: 0 0 15px rgba(180,107,255,0.4);
+    }
+  </style>
+</head>
+
+<body>
+  <img src="fantasma_aura_sem_fundo.png" class="ghost" alt="Fantasma" />
+  <div class="login-container">
+    <img src="Aurinha.png" alt="Logo AURA" style="width: 90px; margin-bottom: 1rem;" />
+    <h1 id="userDisplay">Usuário</h1>
+    <p class="muted">Digite sua senha para continuar.</p>
+    <input type="password" id="password" placeholder="Senha 💜" />
+    <div class="checkbox">
+      <input type="checkbox" id="lembrar" /> <label for="lembrar">Lembrar de mim</label>
+    </div>
+    <button id="loginBtn">Entrar</button>
+    <a href="select.html" style="color:#ccc; font-size:0.9rem; display:block; margin-top:1rem;">⬅ Voltar</a>
+  </div>
+
+  <script type="module">
+    import { app, db } from "./firebaseConfig.js";
+    import { collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-firestore.js";
+    import { logAction } from "../utils/logger.js";
+
+
+    document.addEventListener("DOMContentLoaded", async () => {
+      const username = localStorage.getItem("username");
+      const userDisplay = document.getElementById("userDisplay");
+      const loginBtn = document.getElementById("loginBtn");
+      const passwordInput = document.getElementById("password");
+      const lembrarCheckbox = document.getElementById("lembrar");
+
+      if (!username) {
+        window.location.href = "/select.html";
+        return;
+      }
+
+      userDisplay.textContent = username;
+
+      const savedPassword = localStorage.getItem("savedPassword_" + username);
+      if (savedPassword) {
+        passwordInput.value = savedPassword;
+        lembrarCheckbox.checked = true;
+      }
+
+      loginBtn.addEventListener("click", async () => {
+        const senha = passwordInput.value.trim();
+        if (!senha) {
+          alert("Digite sua senha!");
+          return;
+        }
+
+        try {
+          const q = query(collection(db, "users"), where("name", "==", username));
+          const snapshot = await getDocs(q);
+
+          if (snapshot.empty) {
+            alert("Usuário não encontrado!");
+            return;
+          }
+
+          const userData = snapshot.docs[0].data();
+
+          if (userData.password === senha) {
+            const sessionToken = crypto.randomUUID();
+            document.cookie = `session_token=${sessionToken}; path=/`;
+
+            localStorage.setItem("selectedAgent", username);
+            localStorage.setItem("userRole", userData.role ? userData.role.toLowerCase() : "");
+            localStorage.setItem("userTag", userData.tag || "");
+            localStorage.setItem("userCode", userData.code || "");
+            localStorage.setItem("isAdmin", userData.isAdmin === true ? "true" : "false");
+            localStorage.setItem("username", username);
+
+            if (lembrarCheckbox.checked) {
+              localStorage.setItem("savedPassword_" + username, senha);
+            } else {
+              localStorage.removeItem("savedPassword_" + username);
+            }
+
+            window.location.href = "dashboard.html";
+          } else {
+            alert("Senha incorreta! Tente novamente.");
+          }
+        } catch (err) {
+          console.error(err);
+          alert("Erro ao verificar login. Verifique sua conexão.");
+        }
+      });
+    });
+  </script>
+</body>
+</html>

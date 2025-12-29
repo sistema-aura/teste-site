@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Perfil da Aura — Sistema AURA 💜</title>
+
+  <link rel="icon" href="../Aurinha.png" />
+  <link rel="stylesheet" href="../style.css" />
+
+  <style>
+    .page-container { padding: 2rem; }
+
+    .topbar {
+      display:flex; justify-content:space-between; align-items:center;
+      gap:10px; flex-wrap:wrap; margin-bottom:1.2rem;
+    }
+
+    .btn {
+      background: linear-gradient(90deg,#9b4dff,#b86bff);
+      border:none; border-radius:10px;
+      padding:8px 14px; color:#fff; font-weight:600;
+      cursor:pointer; box-shadow:0 0 10px rgba(180,107,255,.25);
+      transition:.2s;
+    }
+
+    .btn:hover { transform:translateY(-1px); box-shadow:0 10px 22px rgba(180,107,255,.35); }
+
+    .btn-soft {
+      background: rgba(255,255,255,.08);
+      border:1px solid rgba(255,255,255,.08);
+    }
+
+    .btn-danger {
+      background: linear-gradient(90deg,#ff4d6d,#ff7c6b);
+    }
+
+    .searchbar { margin:.5rem 0 1rem; display:flex; gap:8px; }
+    .searchbar input {
+      flex:1; padding:.8rem 1rem;
+      background:rgba(255,255,255,.08);
+      border:none; border-radius:12px; color:#fff; outline:none;
+      box-shadow:0 0 10px rgba(180,107,255,.25);
+    }
+
+    .grid {
+      display:grid; grid-template-columns:repeat(auto-fill,minmax(250px,1fr));
+      gap:16px;
+    }
+
+    .card {
+      background:rgba(255,255,255,.06);
+      border:1px solid rgba(255,255,255,.06);
+      border-radius:14px;
+      padding:1rem; text-align:center;
+      box-shadow:0 10px 22px rgba(180,107,255,.15);
+    }
+
+    .card img {
+      width:84px; height:84px; border-radius:50%;
+      object-fit:cover; box-shadow:0 0 12px rgba(180,107,255,.35);
+    }
+
+    .card h3 { margin:.6rem 0 .2rem; }
+    .card p { margin:.2rem 0; opacity:.9; }
+
+    .buttons { display:flex; justify-content:center; gap:8px; margin-top:.6rem; flex-wrap:wrap; }
+
+    /* ✅ Novo: Cargo + Tag (chips) */
+    .meta-row{
+      display:flex;
+      justify-content:center;
+      gap:10px;
+      flex-wrap:wrap;
+      margin-top:.35rem;
+    }
+
+    .meta-pill{
+      padding:.35rem .65rem;
+      border-radius:999px;
+      font-size:.78rem;
+      font-weight:750;
+      letter-spacing:.2px;
+      background:rgba(0,0,0,.14);
+      border:1px solid rgba(255,255,255,.08);
+      opacity:.95;
+    }
+
+    .tag-pill{
+      padding:.35rem .65rem;
+      border-radius:999px;
+      font-size:.78rem;
+      font-weight:800;
+      border:1px solid rgba(255,255,255,.08);
+      background: rgba(255,255,255,.06);
+    }
+
+    .tag-admin{
+      background: rgba(255, 124, 107, .14);
+      border-color: rgba(255, 124, 107, .28);
+      box-shadow: 0 10px 18px rgba(255,124,107,.10);
+    }
+
+    .tag-inv{
+      background: rgba(140, 255, 199, .12);
+      border-color: rgba(140, 255, 199, .26);
+      box-shadow: 0 10px 18px rgba(140,255,199,.08);
+    }
+
+    .tag-common{
+      background: rgba(180,107,255,.10);
+      border-color: rgba(180,107,255,.20);
+    }
+
+    /* Modal */
+    .aura-modal-wrap {
+      position:fixed; inset:0; background:rgba(0,0,0,.55);
+      display:flex; justify-content:center; align-items:center;
+      z-index:2000; animation:fadeIn .15s ease;
+    }
+
+    .aura-modal {
+      background:rgba(20,0,40,.92); color:#fff;
+      border:1px solid rgba(255,255,255,.08);
+      padding:20px; border-radius:16px;
+      width:min(480px,90vw); text-align:center;
+      animation:popIn .2s ease forwards;
+    }
+
+    @keyframes fadeIn { from{opacity:0} to{opacity:1} }
+    @keyframes popIn { from{transform:translateY(20px)} to{transform:translateY(0)} }
+
+    .aura-btn {
+      padding:.7rem 1.1rem; border-radius:10px; font-weight:600;
+      cursor:pointer; border:none;
+    }
+    .aura-btn.primary { background:linear-gradient(135deg,#b46bff,#9f4dff); color:#fff; }
+
+    .muted { opacity:.7; }
+
+    /* Toast */
+    .aura-toast{
+      position:fixed; right:16px; bottom:16px; z-index:1200;
+      display:flex; gap:10px; align-items:center;
+      background: rgba(20,0,40,.95);
+      border:1px solid rgba(255,255,255,.08);
+      padding:.7rem 1rem; border-radius:12px;
+      color:#fff;
+      box-shadow:0 10px 24px rgba(180,107,255,.35);
+      animation: fadeIn .15s ease;
+    }
+    .aura-toast.success{ border-color: rgba(140,255,199,.35); }
+    .aura-toast.error{ border-color: rgba(255,124,107,.35); }
+
+    /* topbar actions */
+    .top-actions{ display:flex; gap:10px; flex-wrap:wrap; align-items:center; }
+  </style>
+</head>
+
+<body>
+
+  <!-- MENU LATERAL -->
+  <div class="sidebar">
+    <h2 class="logo">SISTEMA AURA</h2>
+    <span id="agentNameDisplay" class="agent-display">Agente: -</span>
+
+    <ul>
+      <li><a href="../dashboard.html" class="navlink active"><span class="icon">🏠</span><span class="label">Dashboard</span></a></li>
+      <li><a href="../pesquisa/ver.html" class="navlink"><span class="icon">🔍</span><span class="label">Pesquisa Geral</span></a></li>
+      <li><a href="../perfis/ver.html" class="navlink"><span class="icon">👑</span><span class="label">Perfil da Aura</span></a></li>
+      <li><a href="../people/ver.html" class="navlink"><span class="icon">🧍</span><span class="label">Pessoas</span></a></li>
+      <li><a href="../casos/ver.html" class="navlink"><span class="icon">📁</span><span class="label">Casos</span></a></li>
+      <li><a href="../investigacoes/ver.html" class="navlink"><span class="icon">🕵️</span><span class="label">Investigações</span></a></li>
+      <li><a href="../veiculos/ver.html" class="navlink"><span class="icon">🏎️</span><span class="label">Veículos</span></a></li>
+      <li><a href="../facc/ver.html" class="navlink"><span class="icon">⚔️</span><span class="label">Facções</span></a></li>
+      <li><a href="../perimetro/ver.html" class="navlink"><span class="icon">📍</span><span class="label">Perímetro de Ações</span></a></li>
+      <li><a href="../reunioes/ver.html" class="navlink"><span class="icon">🗓️</span><span class="label">Reuniões</span></a></li>
+
+      <!-- AQUI: removi o active do Regras CDA -->
+      <li><a href="../regras/ver.html" class="navlink"><span class="icon">📚</span><span class="label">Regras CDA</span></a></li>
+    </ul>
+
+    <button id="logoutBtn">Sair</button>
+  </div>
+  <!-- CONTEÚDO -->
+  <div class="main-content">
+    <div class="page-container">
+
+      <div class="topbar">
+        <h1>Perfil da Aura</h1>
+
+        <!-- ✅ Novo: Arquivados ao lado do Novo -->
+        <div class="top-actions">
+          <button id="newBtn" class="btn only-editor">➕ Novo Perfil</button>
+          <button id="archivedBtn" class="btn btn-soft">📦 Arquivados</button>
+        </div>
+      </div>
+
+      <div class="searchbar">
+        <input id="searchBar" placeholder="Pesquisar por nome ou divisão..." />
+      </div>
+
+      <div id="profilesGrid" class="grid"></div>
+
+    </div>
+  </div>
+
+  <!-- FIREBASE SCRIPT -->
+  <script type="module">
+    import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-app.js";
+    import {
+      getFirestore, collection, getDocs, deleteDoc,
+      updateDoc, addDoc, doc, serverTimestamp,
+      query, orderBy
+    } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-firestore.js";
+
+    import { firebaseConfig } from "../firebaseConfig.js";
+    import { logAction } from "../utils/logger.js";
+
+
+    const app = getApps().length ? getApps()[0] : initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    const grid = document.getElementById("profilesGrid");
+    const search = document.getElementById("searchBar");
+
+    const isAdmin = localStorage.getItem("isAdmin") === "true";
+    const role = (localStorage.getItem("userRole") || "").toLowerCase();
+    const canEdit = isAdmin || role === "investigador";
+
+    let allProfiles = [];
+
+    // Navegação
+    document.getElementById("newBtn").onclick = () => window.location.href = "criar.html";
+    document.getElementById("archivedBtn").onclick = () => window.location.href = "arquivados.html";
+
+    function toast(msg, type="success"){
+      const t=document.createElement("div");
+      t.className=`aura-toast ${type}`;
+      t.innerHTML=`<span>${type==="success"?"✅":"⚠️"}</span><span>${msg}</span>`;
+      document.body.appendChild(t);
+      setTimeout(()=>{ t.style.opacity="0"; setTimeout(()=>t.remove(),260); }, 1900);
+    }
+
+    async function addLog(action, itemType, itemName){
+      try{
+        await addDoc(collection(db,"logs"),{
+          action,
+          itemType,
+          itemName: itemName || "",
+          user: localStorage.getItem("selectedAgent") || "Desconhecido",
+          timestamp: serverTimestamp()
+        });
+        await logAction("criou", "caso", title.value.trim());
+      }catch(e){
+        console.warn("log falhou", e);
+      }
+    }
+
+    function getTag(p){
+      if (p.isAdmin) return { key:"admin", label:"👑 Admin" };
+      if ((p.role || "").toLowerCase() === "investigador") return { key:"inv", label:"🕵️ Investigador" };
+      return { key:"common", label:"✨ Comum" };
+    }
+
+    // LOAD com fallback (funciona mesmo sem createdAt em todos)
+    async function loadProfiles() {
+      try {
+        const q = query(
+          collection(db,"users"),
+          orderBy("createdAt","asc")
+        );
+
+        const snap = await getDocs(q);
+
+        allProfiles = snap.docs.map(d => ({
+          id: d.id,
+          ...d.data()
+        }));
+      } catch(err) {
+        console.warn("Falhou orderBy(createdAt), a usar fallback:", err);
+
+        const snap = await getDocs(collection(db,"users"));
+
+        allProfiles = snap.docs.map(d => ({
+          id: d.id,
+          ...d.data()
+        }));
+
+        allProfiles.sort((a,b)=>{
+          const ta = a.createdAt?.seconds || 0;
+          const tb = b.createdAt?.seconds || 0;
+          return ta - tb;
+        });
+      }
+
+      render(allProfiles);
+    }
+
+    // Renderização
+    function render(list){
+      grid.innerHTML = "";
+
+      if(!list.length){
+        grid.innerHTML = "<p class='muted'>Nenhum perfil encontrado.</p>";
+        return;
+      }
+
+      list.forEach(p => {
+        const card = document.createElement("div");
+        card.className = "card";
+
+        const tag = getTag(p);
+        const cargo = (p.cargo ?? "").toString().trim() || "-";
+
+        card.innerHTML = `
+          <img src="${p.photoURL || '../Aurinha.png'}" />
+          <h3>${p.name || 'Sem nome'}</h3>
+          <p><b>Divisão:</b> ${p.division || '-'}</p>
+
+          <div class="meta-row">
+            <span class="meta-pill"><b>Cargo:</b> ${cargo}</span>
+            <span class="tag-pill ${
+              tag.key === "admin" ? "tag-admin" : tag.key === "inv" ? "tag-inv" : "tag-common"
+            }">${tag.label}</span>
+          </div>
+
+          <div class="buttons">
+            <button class="btn btn-soft viewBtn">👁 Ver</button>
+
+            ${canEdit ? `
+              <button class="btn btn-soft editBtn">🖊 Editar</button>
+              <button class="btn btn-soft archiveBtn">📦 Arquivar</button>
+            ` : ""}
+
+            ${isAdmin ? `
+              <button class="btn btn-soft toggleInvBtn">${p.role==="investigador"?"Retirar Investigador":"Dar Investigador"}</button>
+              <button class="btn btn-soft toggleAdminBtn">${p.isAdmin?"Retirar Admin":"Dar Admin"}</button>
+              <button class="btn btn-danger deleteBtn">🗑 Eliminar</button>
+            ` : ""}
+          </div>
+        `;
+
+        // VER
+        card.querySelector(".viewBtn").onclick = () => {
+          const wrap = document.createElement("div");
+          wrap.className = "aura-modal-wrap";
+
+          const tagTxt = p.isAdmin ? "Admin" : ((p.role || "").toLowerCase()==="investigador" ? "Investigador" : "Comum");
+
+          wrap.innerHTML = `
+            <div class="aura-modal">
+              <img src="${p.photoURL || '../Aurinha.png'}"
+              style="width:110px;height:110px;border-radius:50%;object-fit:cover;margin-bottom:10px;" />
+
+              <h3>${p.name || "Sem nome"}</h3>
+              <p><b>Divisão:</b> ${p.division || "-"}</p>
+              <p><b>Cargo:</b> ${(p.cargo ?? "").toString().trim() || "-"}</p>
+              <p><b>Tag:</b> ${tagTxt}</p>
+              <p><b>ID:</b> ${p.id}</p>
+
+              <button class="aura-btn primary" id="closeModal">Fechar</button>
+            </div>
+          `;
+
+          wrap.onclick = e => { if(e.target===wrap) wrap.remove(); };
+          wrap.querySelector("#closeModal").onclick = () => wrap.remove();
+
+          document.body.appendChild(wrap);
+        };
+
+        // EDITAR
+        card.querySelector(".editBtn")?.addEventListener("click", () => {
+          window.location.href = `editar.html?id=${p.id}`;
+        });
+
+        // ARCHIVE
+        card.querySelector(".archiveBtn")?.addEventListener("click", async () => {
+          await addDoc(collection(db, "users_archived"), { ...p, archivedAt:new Date() });
+          await deleteDoc(doc(db, "users", p.id));
+          await addLog("arquivou","perfil",p.name);
+          toast("Perfil arquivado!");
+          card.remove();
+          await logAction("criou", "caso", title.value.trim());
+        });
+      
+
+        // TOGGLE INVESTIGADOR (mantido)
+        card.querySelector(".toggleInvBtn")?.addEventListener("click", async () => {
+          const newRole = p.role === "investigador" ? "" : "investigador";
+          await updateDoc(doc(db,"users",p.id), { role:newRole });
+          await addLog("alterou","investigador",p.name);
+          toast("Tag Investigador atualizada!");
+          loadProfiles();
+        });
+
+        // TOGGLE ADMIN (mantido)
+        card.querySelector(".toggleAdminBtn")?.addEventListener("click", async () => {
+          const newVal = !p.isAdmin;
+          await updateDoc(doc(db,"users",p.id), { isAdmin:newVal });
+          await addLog("alterou","admin",p.name);
+          toast("Permissão de Admin atualizada!");
+          loadProfiles();
+        });
+
+        // DELETE
+        card.querySelector(".deleteBtn")?.addEventListener("click", async () => {
+          await deleteDoc(doc(db,"users",p.id));
+          await addLog("eliminou","perfil",p.name);
+          toast("Perfil eliminado!");
+          card.remove();
+        });
+
+        grid.appendChild(card);
+      });
+    }
+
+    // Pesquisa
+    search.addEventListener("input", e => {
+      const t = e.target.value.toLowerCase();
+      const filtered = allProfiles.filter(p =>
+        (p.name || "").toLowerCase().includes(t) ||
+        (p.division || "").toLowerCase().includes(t)
+      );
+      render(filtered);
+    });
+
+    loadProfiles();
+  </script>
+
+  <script>
+    // Perfil + Logout + esconder botões sem permissão
+    (function(){
+      const agent = localStorage.getItem("selectedAgent") || "Desconhecido";
+      document.getElementById("agentNameDisplay").textContent = `Agente: ${agent}`;
+
+      document.getElementById("logoutBtn").onclick = () => {
+        ["username","selectedAgent","userRole","userCode","isAdmin"].forEach(k => localStorage.removeItem(k));
+        window.location.href = "../select.html";
+      };
+
+      const isAdmin = localStorage.getItem("isAdmin") === "true";
+      const role = (localStorage.getItem("userRole") || "").toLowerCase();
+      const canEdit = isAdmin || role === "investigador";
+
+      // só editores veem “Novo Perfil”
+      document.querySelectorAll(".only-editor").forEach(el=>{
+        el.style.display = canEdit ? "" : "none";
+      });
+    })();
+  </script>
+
+</body>
+</html>

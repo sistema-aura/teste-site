@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<body>
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-app.js";
+import { getFirestore, collection, getDocs, updateDoc, doc } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-firestore.js";
+import { firebaseConfig } from "./firebaseConfig.js";
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+async function fixLogs() {
+  const snap = await getDocs(collection(db, "logs"));
+
+  for (const d of snap.docs) {
+    const data = d.data();
+
+    if (!data.userName || data.userName === "Desconhecido") {
+      await updateDoc(doc(db, "logs", d.id), {
+        userName: "dudinha"
+      });
+    }
+  }
+
+  alert("Logs atualizados com sucesso!");
+}
+
+fixLogs();
+</script>
+</body>
+</html>

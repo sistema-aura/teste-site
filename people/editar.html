@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8">
+  <title>Editar Pessoa — Sistema AURA</title>
+  <link rel="icon" href="../Aurinha.png">
+  <link rel="stylesheet" href="../style.css">
+
+  <style>
+    .form-card{
+      max-width: 900px;
+      margin: 0 auto;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 18px;
+      padding: 1.6rem 1.8rem;
+      box-shadow: 0 20px 40px rgba(180,107,255,.18);
+    }
+
+    .form-grid{
+      display:grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px,1fr));
+      gap: 14px;
+    }
+
+    .form-group label{
+      font-size:.85rem;
+      opacity:.85;
+      margin-bottom:4px;
+      display:block;
+    }
+
+    .form-group input,
+    .form-group select,
+    textarea{
+      width:100%;
+      padding:.75rem .9rem;
+      border-radius:12px;
+      background: rgba(0,0,0,.25);
+      border:1px solid rgba(255,255,255,.08);
+      color:#fff;
+      outline:none;
+    }
+
+    textarea{ resize:vertical; }
+
+    .section{
+      margin-top:1.4rem;
+    }
+
+    .section h3{
+      margin:0 0 .6rem;
+      font-size:1rem;
+      opacity:.95;
+    }
+
+    .photo-row{
+      display:flex;
+      align-items:center;
+      gap:14px;
+    }
+
+    .photo-preview{
+      width:70px;
+      height:70px;
+      border-radius:50%;
+      background: rgba(0,0,0,.3);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      overflow:hidden;
+    }
+
+    .photo-preview img{
+      width:100%;
+      height:100%;
+      object-fit:cover;
+    }
+
+    .actions{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      margin-top:1.6rem;
+    }
+
+    .danger{
+      background: linear-gradient(135deg,#ff5f6d,#ff7c6b);
+    }
+  </style>
+</head>
+
+<body>
+<div class="main-content">
+  <div class="page-container">
+
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem">
+      <h1>🖊 Editar Pessoa</h1>
+      <button class="btn btn-soft" onclick="history.back()">← Voltar</button>
+    </div>
+
+    <form id="editForm" class="form-card">
+
+      <!-- IDENTIFICAÇÃO -->
+      <div class="section">
+        <h3>🧾 Identificação</h3>
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Nome</label>
+            <input id="name" required>
+          </div>
+
+          <div class="form-group">
+            <label>Telefone</label>
+            <input id="phone" placeholder="(055) 000-000">
+          </div>
+
+          <div class="form-group">
+            <label>Tipo</label>
+            <select id="type">
+              <option value="civil">🧍 Civil</option>
+              <option value="PM">👮 PM</option>
+              <option value="fac">⚔️ Facção</option>
+            </select>
+          </div>
+
+          <div class="form-group" id="roleBox" style="display:none;">
+            <label>Cargo</label>
+            <input id="role">
+          </div>
+        </div>
+      </div>
+
+      <!-- FOTO -->
+      <div class="section">
+        <h3>📷 Foto (opcional)</h3>
+        <div class="photo-row">
+          <div class="photo-preview">
+            <img id="photoPreview" src="../Aurinha.png">
+          </div>
+          <input type="file" id="photoFile" accept="image/*">
+        </div>
+      </div>
+
+      <!-- OBS -->
+      <div class="section">
+        <h3>📝 Observações</h3>
+        <textarea id="notes" rows="6"
+          placeholder="Histórico, ligações conhecidas, comportamento, notas importantes para RP…"></textarea>
+      </div>
+
+      <!-- AÇÕES -->
+      <div class="actions">
+        <button type="button" id="deleteBtn" class="btn danger">🗑 Eliminar</button>
+        <button class="btn">💾 Guardar Alterações</button>
+      </div>
+    </form>
+
+  </div>
+</div>
+
+<script type="module">
+import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-app.js";
+import { getFirestore, doc, getDoc, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-firestore.js";
+import { firebaseConfig } from "../firebaseConfig.js";
+import { logAction } from "../utils/logger.js";
+
+
+const app = getApps().length ? getApps()[0] : initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+const id = new URLSearchParams(location.search).get("id");
+if(!id) location.href="ver.html";
+
+/* TELEFONE */
+const phone=document.getElementById("phone");
+const PREFIX="(055) ";
+phone.addEventListener("input",()=>{
+  let d=phone.value.replace(/\D/g,"").slice(3,9);
+  phone.value=PREFIX+(d.length>3?d.slice(0,3)+"-"+d.slice(3):d);
+});
+
+/* CARGO */
+const type=document.getElementById("type");
+const roleBox=document.getElementById("roleBox");
+type.onchange=()=>roleBox.style.display=(type.value==="PM"||type.value==="fac")?"block":"none";
+
+/* FOTO PREVIEW */
+photoFile.onchange=e=>{
+  const f=e.target.files[0];
+  if(f) photoPreview.src=URL.createObjectURL(f);
+};
+
+/* LOAD */
+(async()=>{
+  const snap = await getDoc(doc(db,"people",id));
+  if(!snap.exists()) return;
+
+  const p = snap.data();
+  name.value = p.name || "";
+  phone.value = p.phone || PREFIX;
+  type.value = p.type || "civil";
+  role.value = p.role || "";
+  notes.value = p.notes || "";
+  roleBox.style.display = (type.value==="PM"||type.value==="fac")?"block":"none";
+})();
+
+/* SAVE */
+editForm.onsubmit = async e=>{
+  e.preventDefault();
+  await updateDoc(doc(db,"people",id),{
+    name: name.value.trim(),
+    phone: phone.value,
+    type: type.value,
+    role: role.value.trim(),
+    notes: notes.value.trim()
+  });
+  location.href="ver.html";
+       await logAction("editou", "caso", title.value.trim());
+};
+
+/* DELETE */
+deleteBtn.onclick = async ()=>{
+  if(!confirm("Eliminar esta pessoa?")) return;
+  await deleteDoc(doc(db,"people",id));
+  location.href="ver.html";
+  await logAction("apagou", "caso", title.value.trim());
+};
+</script>
+</body>
+</html>

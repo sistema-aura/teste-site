@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Criar Perfil — Sistema AURA 💜</title>
+
+  <link rel="icon" href="../Aurinha.png" />
+  <link rel="stylesheet" href="../style.css" />
+
+  <style>
+    .page-container { padding: 2rem; max-width: 1100px; margin: 0 auto; }
+    .topbar {
+      display:flex; justify-content:space-between; align-items:center;
+      margin-bottom:1.4rem; flex-wrap:wrap; gap:8px;
+    }
+    .btn {
+      background: linear-gradient(90deg,#9b4dff,#b86bff);
+      border:none; border-radius:10px; color:#fff; font-weight:600;
+      padding:8px 14px; cursor:pointer; transition:.2s;
+      box-shadow:0 0 10px rgba(180,107,255,.25);
+    }
+    .btn:hover{ transform:translateY(-1px); box-shadow:0 10px 22px rgba(180,107,255,.35); }
+    .btn-soft{ background:rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.08); }
+    .btn-danger{ background: linear-gradient(90deg,#ff4d6d,#ff7c6b); }
+
+    form {
+      background: rgba(255,255,255,.06);
+      border: 1px solid rgba(255,255,255,.06);
+      border-radius: 16px;
+      padding: 22px;
+      box-shadow: 0 10px 22px rgba(180,107,255,.15);
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 16px;
+    }
+    label { font-weight:600; opacity:.95; margin-bottom:4px; display:block; }
+    input, textarea, select {
+      width:100%; padding:.8rem 1rem; border-radius:12px; border:none; outline:none;
+      background:rgba(255,255,255,.08); color:#fff;
+      box-shadow:0 0 10px rgba(180,107,255,.18);
+    }
+    textarea{ resize:vertical; min-height:90px; }
+    .col-12 { grid-column:1/-1; }
+    .preview { display:flex; align-items:center; gap:10px; }
+    .preview img { width:80px; height:80px; border-radius:10px; object-fit:cover; box-shadow:0 0 12px rgba(180,107,255,.35); }
+
+    .aura-toast {
+      position:fixed; right:16px; bottom:16px; z-index:9999; display:flex;
+      gap:10px; align-items:center; background:rgba(20,0,40,.95);
+      border:1px solid rgba(255,255,255,.08); padding:.7rem 1rem;
+      border-radius:12px; color:#fff; box-shadow:0 10px 24px rgba(180,107,255,.35);
+      animation:fadeIn .15s ease;
+    }
+    .aura-toast.success{border-color:rgba(140,255,199,.35);}
+    .aura-toast.error{border-color:rgba(255,124,107,.35);}
+    @keyframes fadeIn{from{opacity:0}to{opacity:1}}
+  </style>
+</head>
+
+<body>
+  <!-- MENU LATERAL -->
+  <div class="sidebar">
+    <h2 class="logo">SISTEMA AURA</h2>
+    <span id="agentNameDisplay" class="agent-display">Agente: -</span>
+
+    <ul>
+      <li><a href="../dashboard.html" class="navlink active"><span class="icon">🏠</span><span class="label">Dashboard</span></a></li>
+      <li><a href="../pesquisa/ver.html" class="navlink"><span class="icon">🔍</span><span class="label">Pesquisa Geral</span></a></li>
+      <li><a href="../perfis/ver.html" class="navlink"><span class="icon">👑</span><span class="label">Perfil da Aura</span></a></li>
+      <li><a href="../people/ver.html" class="navlink"><span class="icon">🧍</span><span class="label">Pessoas</span></a></li>
+      <li><a href="../casos/ver.html" class="navlink"><span class="icon">📁</span><span class="label">Casos</span></a></li>
+      <li><a href="../investigacoes/ver.html" class="navlink"><span class="icon">🕵️</span><span class="label">Investigações</span></a></li>
+      <li><a href="../veiculos/ver.html" class="navlink"><span class="icon">🏎️</span><span class="label">Veículos</span></a></li>
+      <li><a href="../facc/ver.html" class="navlink"><span class="icon">⚔️</span><span class="label">Facções</span></a></li>
+      <li><a href="../perimetro/ver.html" class="navlink"><span class="icon">📍</span><span class="label">Perímetro de Ações</span></a></li>
+      <li><a href="../reunioes/ver.html" class="navlink"><span class="icon">🗓️</span><span class="label">Reuniões</span></a></li>
+      <li><a href="../casos/arquivados.html" class="navlink"><span class="icon">🗃️</span><span class="label">Casos Arquivados</span></a></li>
+    </ul>
+
+    <button id="logoutBtn">Sair</button>
+  </div>
+
+  <!-- CONTEÚDO -->
+  <div class="main-content">
+    <div class="page-container">
+      <div class="topbar">
+        <h1>Criar Novo Perfil</h1>
+        <button id="backBtn" class="btn btn-soft">⬅️ Voltar</button>
+      </div>
+
+      <form id="createForm">
+        <div>
+          <label>Nome</label>
+          <input id="name" placeholder="Nome completo" required />
+        </div>
+
+        <div>
+          <label>Divisão</label>
+          <input id="division" placeholder="Investigação / Estratégia..." />
+        </div>
+
+        <!-- ✅ NOVO: CARGO LIVRE -->
+        <div>
+          <label>Cargo (livre)</label>
+          <input id="cargo" placeholder="Ex: 01" />
+          <small style="opacity:.8;">Ex.: 01, 02, 03, etc. (campo livre)</small>
+        </div>
+
+        <div>
+          <label>Entrada</label>
+          <input id="joinDate" type="date" />
+        </div>
+
+        <div>
+          <label>Alias/Nick</label>
+          <input id="alias" placeholder="Opcional" />
+        </div>
+
+        <div>
+          <label>Foto (ficheiro do PC)</label>
+          <div class="preview">
+            <img id="photoPreview" src="../Aurinha.png" alt="preview" />
+            <input id="photoFile" type="file" accept="image/*" />
+          </div>
+          <small style="opacity:.8;">Opcional — se escolheres uma imagem, será enviada para o Storage automaticamente.</small>
+        </div>
+
+        <div class="col-12">
+          <label>Descrição</label>
+          <textarea id="description" placeholder="Notas, conquistas, observações..."></textarea>
+        </div>
+
+        <div class="col-12" style="text-align:right;">
+          <button class="btn" id="createBtn">💾 Guardar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- FIREBASE -->
+ <script type="module">
+  import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-app.js";
+  import { getFirestore, collection, addDoc, getDocs, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-firestore.js";
+  import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-storage.js";
+  import { firebaseConfig } from "../firebaseConfig.js";
+  import { logAction } from "../utils/logger.js";
+
+
+  const app = getApps().length ? getApps()[0] : initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+  const storage = getStorage(app);
+
+  const nameEl = document.getElementById("name");
+  const divisionEl = document.getElementById("division");
+  const cargoEl = document.getElementById("cargo"); // ✅
+  const joinDateEl = document.getElementById("joinDate");
+  const aliasEl = document.getElementById("alias");
+  const descriptionEl = document.getElementById("description");
+  const photoFile = document.getElementById("photoFile");
+  const photoPreview = document.getElementById("photoPreview");
+
+  document.getElementById("backBtn").onclick = () => window.location.href = "ver.html";
+
+  photoFile.addEventListener("change", () => {
+    const f = photoFile.files?.[0];
+    if (f) photoPreview.src = URL.createObjectURL(f);
+  });
+
+  function toast(msg, type="success"){
+    const t=document.createElement("div");
+    t.className=`aura-toast ${type}`;
+    t.innerHTML=`<span>${type==="success"?"✅":"⚠️"}</span><span>${msg}</span>`;
+    document.body.appendChild(t);
+    setTimeout(()=>{t.style.opacity="0";setTimeout(()=>t.remove(),250);},2000);
+  }
+
+  async function uploadPhoto(){
+    const f = photoFile.files?.[0];
+    if(!f) return null;
+    const safeName = (f.name || "photo").replace(/[^\w.\-]+/g,"_");
+    const refPath = ref(storage, `users/${Date.now()}_${safeName}`);
+    await uploadBytes(refPath, f);
+    return await getDownloadURL(refPath);
+  }
+
+  function generatePassword(){
+    const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+    let pass = "";
+    for (let i = 0; i < 6; i++) pass += chars.charAt(Math.floor(Math.random() * chars.length));
+    return "aur4_" + pass;
+  }
+
+  async function generateNextCode(){
+    const snap = await getDocs(collection(db, "users"));
+    const count = snap.size + 1;
+    return "A-" + count;
+  }
+
+  document.getElementById("createForm").addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    const role = (localStorage.getItem("userRole") || "").toLowerCase();
+    const isAdmin = localStorage.getItem("isAdmin") === "true";
+    if (!(isAdmin || role === "investigador")) {
+      toast("Apenas investigadores ou admin podem criar perfis.","error");
+      return;
+    }
+
+    try {
+      const photoURL = await uploadPhoto();
+      const code = await generateNextCode();
+      const password = generatePassword();
+
+      const newProfile = {
+        code,
+        createdAt: serverTimestamp(),
+        faction: "AURA",
+        name: nameEl.value.trim(),
+        password,
+
+        // ✅ Mantive a tua lógica como está
+        role: "Recruta",
+        tag: "",
+
+        // ✅ NOVO: CARGO (livre)
+        cargo: cargoEl.value.trim(),
+
+        type: "AURA",
+        division: divisionEl.value.trim(),
+        joinDate: joinDateEl.value || "",
+        alias: aliasEl.value.trim(),
+        description: descriptionEl.value.trim(),
+        photoURL: photoURL || "",
+        createdBy: localStorage.getItem("selectedAgent") || "Desconhecido",
+      };
+
+      await addDoc(collection(db, "users"), newProfile);
+      toast("✅ Perfil criado com sucesso!");
+      setTimeout(()=> window.location.href = "ver.html", 1200);
+    } catch (e) {
+      console.error("Erro ao criar:", e);
+      toast("Erro: " + e.message, "error");
+    }
+  });
+  await logAction("criou", "caso", title.value.trim());
+</script>
+
+  <script>
+  (function(){
+    const agent=localStorage.getItem("selectedAgent")||"Desconhecido";
+    document.getElementById("agentNameDisplay").textContent=`Agente: ${agent}`;
+    document.getElementById("logoutBtn").onclick=()=>{
+      ["username","selectedAgent","userRole","userCode","isAdmin"].forEach(k=>localStorage.removeItem(k));
+      window.location.href="../select.html";
+    };
+  })();
+  </script>
+</body>
+</html>

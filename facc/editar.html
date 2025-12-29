@@ -1,0 +1,643 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="UTF-8">
+<title>Editar Facção — Sistema AURA</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<link rel="icon" href="../Aurinha.png">
+<link rel="stylesheet" href="../style.css">
+
+<style>
+/* ====== REMOVER SUBLINHADO ====== */
+a{ text-decoration:none !important; }
+
+/* ====== OVERLAY FANTASMA ====== */
+.ghost-overlay{
+  position:fixed;
+  inset:0;
+  background:rgba(15,10,30,.85);
+  backdrop-filter: blur(8px);
+  display:none;
+  align-items:center;
+  justify-content:center;
+  z-index:99999;
+}
+
+.ghost-wrap{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:16px;
+}
+
+.ghost-img{
+  width:350px;
+  animation: float 2.5s ease-in-out infinite;
+  filter: drop-shadow(0 0 25px rgba(180,80,255,.6));
+}
+
+.ghost-text{
+  color:#e9d5ff;
+  font-weight:900;
+  font-size:1.1rem;
+}
+
+@keyframes float {
+  0% { transform: translateY(0px); }
+  50% { transform: translateY(-12px); }
+  100% { transform: translateY(0px); }
+}
+/* ====== FORM ====== */
+.form-card{
+  max-width:1100px;margin:0 auto;
+  background:rgba(255,255,255,.06);
+  border:1px solid rgba(255,255,255,.08);
+  border-radius:18px;
+  padding:1.6rem;
+}
+.section{margin-top:1.6rem}
+.form-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(240px,1fr));
+  gap:14px
+}
+input,textarea{
+  width:100%;
+  padding:.75rem;
+  border-radius:12px;
+  background:rgba(0,0,0,.25);
+  border:1px solid rgba(255,255,255,.08);
+  color:#fff;
+}
+textarea{min-height:100px;resize:vertical}
+
+/* ====== AUTOCOMPLETE ====== */
+.search-wrapper{position:relative}
+.autocomplete-list{
+  position:absolute; top:100%; left:0; right:0;
+  background:#1b0033;
+  border-radius:12px;
+  max-height:200px;
+  overflow-y:auto;
+  display:none;
+  z-index:9999;
+  border:1px solid rgba(255,255,255,.08);
+}
+.autocomplete-item{
+  padding:.6rem .7rem;
+  cursor:pointer;
+}
+.autocomplete-item:hover{
+  background:rgba(180,107,255,.28);
+}
+
+/* ====== CHIPS ====== */
+.chip{
+  background:#a855f733;
+  padding:.35rem .6rem;
+  border-radius:999px;
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  margin:4px;
+  border:1px solid rgba(255,255,255,.08);
+}
+.chip button{
+  border:none;
+  background:rgba(255,255,255,.12);
+  color:#fff;
+  cursor:pointer;
+  width:22px;height:22px;
+  border-radius:999px;
+  line-height:22px;
+  font-weight:900;
+}
+
+/* ====== PREVIEWS ====== */
+.photo-preview{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px}
+.thumb{
+  width:120px;height:120px;
+  border-radius:14px;
+  overflow:hidden;
+  position:relative;
+  border:1px solid rgba(255,255,255,.10);
+}
+.thumb img{
+  width:100%;height:100%;
+  object-fit:cover;
+}
+.thumb .x{
+  position:absolute;top:6px;right:6px;
+  width:26px;height:26px;
+  border-radius:999px;
+  border:none;
+  background:#ff4d6d;
+  color:#fff;
+  cursor:pointer;
+  font-weight:900;
+  line-height:26px;
+}
+
+/* ====== COR PREVIEW ====== */
+.color-row{display:flex;gap:15px;align-items:center;flex-wrap:wrap}
+.color-preview{
+  width:70px;height:45px;border-radius:12px;
+  box-shadow:0 0 10px rgba(0,0,0,.4);
+  border:1px solid rgba(255,255,255,.10);
+}
+
+/* ====== AÇÕES ====== */
+.actions{display:flex;gap:12px;margin-top:2rem;flex-wrap:wrap}
+.btn{
+  padding:.8rem 1.4rem;
+  border-radius:14px;
+  cursor:pointer;
+  font-weight:900;
+  border:1px solid rgba(255,255,255,.15);
+  background:rgba(255,255,255,.10);
+  color:#fff;
+}
+.btn-save{
+  background:linear-gradient(135deg,#7c3aed,#9333ea);
+  border:none;
+}
+.btn-danger{
+  background:#ff4d6d;
+  border:none;
+}
+</style>
+</head>
+
+<body>
+
+<!-- Overlay fantasma -->
+<div class="ghost-overlay" id="ghostOverlay">
+  <div class="ghost-wrap">
+    <img src="../fantasma_aura_sem_fundo.png" class="ghost-img">
+    <div class="ghost-text">A guardar...</div>
+  </div>
+</div>
+
+
+<div class="sidebar">
+  <h2 class="logo">SISTEMA AURA</h2>
+  <span id="agentNameDisplay"></span>
+
+    <ul>
+      <li><a href="../dashboard.html" class="navlink active"><span class="icon">🏠</span><span class="label">Dashboard</span></a></li>
+      <li><a href="../pesquisa/ver.html" class="navlink"><span class="icon">🔍</span><span class="label">Pesquisa Geral</span></a></li>
+      <li><a href="../perfis/ver.html" class="navlink"><span class="icon">👑</span><span class="label">Perfil da Aura</span></a></li>
+      <li><a href="../people/ver.html" class="navlink"><span class="icon">🧍</span><span class="label">Pessoas</span></a></li>
+      <li><a href="../casos/ver.html" class="navlink"><span class="icon">📁</span><span class="label">Casos</span></a></li>
+      <li><a href="../investigacoes/ver.html" class="navlink"><span class="icon">🕵️</span><span class="label">Investigações</span></a></li>
+      <li><a href="../veiculos/ver.html" class="navlink"><span class="icon">🏎️</span><span class="label">Veículos</span></a></li>
+      <li><a href="facc/ver.html" class="navlink"><span class="icon">⚔️</span><span class="label">Facções</span></a></li>
+      <li><a href="../perimetro/ver.html" class="navlink"><span class="icon">📍</span><span class="label">Perímetro de Ações</span></a></li>
+      <li><a href="../reunioes/ver.html" class="navlink"><span class="icon">🗓️</span><span class="label">Reuniões</span></a></li>
+
+      <!-- AQUI: removi o active do Regras CDA -->
+      <li><a href="../regras/ver.html" class="navlink"><span class="icon">📚</span><span class="label">Regras CDA</span></a></li>
+    </ul>
+
+    <button id="logoutBtn">Sair</button>
+  </div>
+
+<div class="main-content">
+<div class="page-container">
+
+<h1>✏️ Editar Facção</h1>
+
+<form id="editForm" class="form-card">
+
+  <!-- IDENTIFICAÇÃO -->
+  <div class="section">
+    <h3>🧾 Identificação</h3>
+    <div class="form-grid">
+      <input id="nome" placeholder="Nome" required>
+      <input id="sigla" placeholder="Sigla">
+    </div>
+  </div>
+
+  <!-- COR -->
+  <div class="section">
+    <h3>🎨 Cor da Facção</h3>
+    <div class="color-row">
+      <input type="color" id="faccColor">
+      <div id="colorPreview" class="color-preview"></div>
+    </div>
+  </div>
+
+  <!-- FOTO FACÇÃO -->
+  <div class="section">
+    <h3>📸 Foto da Facção</h3>
+    <input type="file" id="faccPhotoInput" accept="image/*">
+    <div id="faccPreview" class="photo-preview"></div>
+  </div>
+
+  <!-- HIERARQUIA -->
+  <div class="section">
+    <h3>👑 Hierarquia</h3>
+
+    <div class="form-grid">
+      <div class="search-wrapper">
+        <input id="o1Input" placeholder="01">
+        <div class="autocomplete-list"></div>
+      </div>
+      <div class="search-wrapper">
+        <input id="o2Input" placeholder="02">
+        <div class="autocomplete-list"></div>
+      </div>
+      <div class="search-wrapper">
+        <input id="o3Input" placeholder="03">
+        <div class="autocomplete-list"></div>
+      </div>
+    </div>
+
+    <div class="search-wrapper" style="margin-top:12px">
+      <input id="membrosInput" placeholder="Adicionar membros">
+      <div class="autocomplete-list"></div>
+    </div>
+
+    <div id="membrosChips"></div>
+  </div>
+
+  <!-- PRODUTOS -->
+  <div class="section">
+    <h3>📦 Produtos</h3>
+    <input id="productInput" placeholder="Produto (Enter para adicionar)">
+    <div id="productList"></div>
+  </div>
+
+  <!-- BASE -->
+  <div class="section">
+    <h3>🏠 Base</h3>
+    <div class="form-grid">
+      <input id="baseNome" placeholder="Nome da base">
+      <input id="baseLocal" placeholder="Localização">
+    </div>
+    <textarea id="baseNotas" placeholder="Notas"></textarea>
+  </div>
+
+  <!-- FOTOS BASE -->
+  <div class="section">
+    <h3>📸 Fotos da Base</h3>
+    <input type="file" id="basePhotosInput" multiple accept="image/*">
+    <div id="basePreview" class="photo-preview"></div>
+  </div>
+
+  <div class="actions">
+    <button type="button" class="btn" onclick="location.href='ver.html'">⬅ Voltar</button>
+    <button type="button" id="deleteBtn" class="btn btn-danger">🗑 Eliminar</button>
+    <button class="btn btn-save">💾 Guardar</button>
+  </div>
+
+</form>
+
+</div>
+</div>
+
+<script type="module">
+import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-app.js";
+import {
+  getFirestore, doc, getDoc, updateDoc, deleteDoc,
+  collection, getDocs
+} from "https://www.gstatic.com/firebasejs/10.13.1/firebase-firestore.js";
+import {
+  getStorage, ref, uploadBytes, getDownloadURL
+} from "https://www.gstatic.com/firebasejs/10.13.1/firebase-storage.js";
+import { firebaseConfig } from "../firebaseConfig.js";
+import { logAction } from "../utils/logger.js";
+
+
+const id = new URLSearchParams(location.search).get("id");
+if(!id) location.href="ver.html";
+
+const app = getApps().length ? getApps()[0] : initializeApp(firebaseConfig);
+const db = getFirestore(app);
+const storage = getStorage(app);
+
+/* ===== UI ===== */
+const ghostOverlay = document.getElementById("ghostOverlay");
+const showGhost = async () => {
+  ghostOverlay.style.display = "flex";
+  // força o browser a renderizar o overlay antes de tasks pesadas
+  await new Promise(r => setTimeout(r, 120));
+};
+const hideGhost = () => ghostOverlay.style.display = "none";
+
+/* ===== Carregar people ===== */
+const peopleSnap = await getDocs(collection(db,"people"));
+const PEOPLE = peopleSnap.docs.map(d => ({
+  id: d.id,
+  label: d.data().name || "-",
+  photo: d.data().photo || "" // caso exista
+}));
+
+const peopleById = Object.fromEntries(PEOPLE.map(p => [p.id, p]));
+
+/* ===== Carregar facção ===== */
+const faccRef = doc(db,"facc",id);
+const faccSnap = await getDoc(faccRef);
+if(!faccSnap.exists()) location.href="ver.html";
+const original = faccSnap.data();
+
+/* ===== Estado ===== */
+let o1 = original.hierarquia?.o1 || null;
+let o2 = original.hierarquia?.o2 || null;
+let o3 = original.hierarquia?.o3 || null;
+let membros = [...(original.hierarquia?.membros || [])];
+
+let produtos = [...(original.produtos || [])];
+
+let baseFotosExistentes = [...(original.baseFotos || [])];
+let baseFotosNovas = []; // Files
+
+let faccFotoAtual = original.faccFoto || null; // string url ou null
+let faccFotoNova = null; // File
+let faccFotoRemovida = false;
+
+/* ===== Preencher inputs ===== */
+nome.value = original.nome || "";
+sigla.value = original.sigla || "";
+faccColor.value = original.cor || "#7c3aed";
+colorPreview.style.background = faccColor.value;
+
+baseNome.value = original.base?.nome || "";
+baseLocal.value = original.base?.local || "";
+baseNotas.value = original.base?.notas || "";
+
+/* ===== Cor preview ===== */
+faccColor.oninput = () => colorPreview.style.background = faccColor.value;
+
+/* ===== Helpers ===== */
+const labelById = (pid) => peopleById[pid]?.label || "";
+function uniquePush(arr, v){ if(!arr.includes(v)) arr.push(v); }
+
+/* ===== Autocomplete genérico ===== */
+let acBound = false;
+function setupAutocomplete(input, onPick, {blocked = [], clearOnPick = false} = {}){
+  const box = input.nextElementSibling;
+
+  input.addEventListener("input", () => {
+    const q = input.value.toLowerCase().trim();
+    box.innerHTML = "";
+    if(!q){ box.style.display="none"; return; }
+
+    PEOPLE
+      .filter(p => p.label.toLowerCase().includes(q) && !blocked.includes(p.id))
+      .slice(0, 10)
+      .forEach(p => {
+        const item = document.createElement("div");
+        item.className = "autocomplete-item";
+        item.textContent = p.label;
+        item.onclick = () => {
+          onPick(p);
+          input.value = clearOnPick ? "" : p.label;
+          box.style.display = "none";
+          input.focus();
+        };
+        box.appendChild(item);
+      });
+
+    box.style.display = box.children.length ? "block" : "none";
+  });
+
+  if(!acBound){
+    acBound = true;
+    document.addEventListener("click",(e)=>{
+      document.querySelectorAll(".autocomplete-list").forEach(el=>{
+        const inp = el.previousElementSibling;
+        if(el.contains(e.target) || inp.contains(e.target)) return;
+        el.style.display = "none";
+      });
+    });
+  }
+}
+
+/* ===== 01/02/03 (mantém nome no input) ===== */
+o1Input.value = labelById(o1);
+o2Input.value = labelById(o2);
+o3Input.value = labelById(o3);
+
+setupAutocomplete(o1Input, (p)=>{ o1 = p.id; o1Input.value = p.label; }, {blocked:[o2,o3], clearOnPick:false});
+setupAutocomplete(o2Input, (p)=>{ o2 = p.id; o2Input.value = p.label; }, {blocked:[o1,o3], clearOnPick:false});
+setupAutocomplete(o3Input, (p)=>{ o3 = p.id; o3Input.value = p.label; }, {blocked:[o1,o2], clearOnPick:false});
+
+/* ===== Membros (seleciona e LIMPA input) ===== */
+function renderMembros(){
+  membrosChips.innerHTML = "";
+  membros.forEach(pid=>{
+    const p = peopleById[pid];
+    if(!p) return;
+    const chip = document.createElement("span");
+    chip.className = "chip";
+    chip.innerHTML = `${p.label}<button type="button">×</button>`;
+    chip.querySelector("button").onclick = ()=>{
+      membros = membros.filter(x=>x!==pid);
+      renderMembros();
+    };
+    membrosChips.appendChild(chip);
+  });
+}
+renderMembros();
+
+setupAutocomplete(
+  membrosInput,
+  (p)=>{
+    // não duplicar, nem permitir 01/02/03 repetidos
+    if([o1,o2,o3].includes(p.id)) return;
+    uniquePush(membros, p.id);
+    renderMembros();
+  },
+  {blocked:membros, clearOnPick:true}
+);
+
+/* ===== Produtos ===== */
+function renderProdutos(){
+  productList.innerHTML = "";
+  produtos.forEach(txt=>{
+    const chip = document.createElement("span");
+    chip.className = "chip";
+    chip.innerHTML = `${txt}<button type="button">×</button>`;
+    chip.querySelector("button").onclick = ()=>{
+      produtos = produtos.filter(p=>p!==txt);
+      renderProdutos();
+    };
+    productList.appendChild(chip);
+  });
+}
+renderProdutos();
+
+productInput.addEventListener("keydown",(e)=>{
+  if(e.key==="Enter"){
+    e.preventDefault();
+    const val = productInput.value.trim();
+    if(!val) return;
+    produtos.push(val);
+    productInput.value="";
+    renderProdutos();
+  }
+});
+
+/* ===== Foto Facção ===== */
+function renderFaccFoto(){
+  faccPreview.innerHTML = "";
+
+  // se removida, não mostra nada
+  if(faccFotoRemovida) return;
+
+  const url = faccFotoNova ? URL.createObjectURL(faccFotoNova) : faccFotoAtual;
+  if(!url) return;
+
+  const wrap = document.createElement("div");
+  wrap.className = "thumb";
+  wrap.innerHTML = `<img src="${url}"><button type="button" class="x">×</button>`;
+  wrap.querySelector(".x").onclick = ()=>{
+    // remove do documento
+    faccFotoAtual = null;
+    faccFotoNova = null;
+    faccFotoRemovida = true;
+    renderFaccFoto();
+  };
+  faccPreview.appendChild(wrap);
+}
+renderFaccFoto();
+
+faccPhotoInput.addEventListener("change", ()=>{
+  const f = faccPhotoInput.files[0];
+  if(!f) return;
+  faccFotoNova = f;
+  faccFotoRemovida = false;
+  renderFaccFoto();
+});
+
+/* ===== Fotos Base ===== */
+function renderBaseFotos(){
+  basePreview.innerHTML = "";
+
+  baseFotosExistentes.forEach((url, idx)=>{
+    const wrap = document.createElement("div");
+    wrap.className = "thumb";
+    wrap.innerHTML = `<img src="${url}"><button type="button" class="x">×</button>`;
+    wrap.querySelector(".x").onclick = ()=>{
+      baseFotosExistentes.splice(idx,1); // remove do array (do Firestore)
+      renderBaseFotos();
+    };
+    basePreview.appendChild(wrap);
+  });
+
+  baseFotosNovas.forEach((file, idx)=>{
+    const url = URL.createObjectURL(file);
+    const wrap = document.createElement("div");
+    wrap.className = "thumb";
+    wrap.innerHTML = `<img src="${url}"><button type="button" class="x">×</button>`;
+    wrap.querySelector(".x").onclick = ()=>{
+      baseFotosNovas.splice(idx,1);
+      renderBaseFotos();
+    };
+    basePreview.appendChild(wrap);
+  });
+}
+renderBaseFotos();
+
+basePhotosInput.addEventListener("change", ()=>{
+  const files = [...basePhotosInput.files];
+  if(!files.length) return;
+  baseFotosNovas.push(...files);
+  basePhotosInput.value = ""; // permite selecionar novamente a mesma foto
+  renderBaseFotos();
+});
+
+/* ===== GUARDAR ===== */
+editForm.addEventListener("submit", async (e)=>{
+  e.preventDefault();
+  await showGhost();
+
+  try{
+    // 1) upload facc foto se houver nova
+    let faccFotoFinal = faccFotoAtual;
+    if(faccFotoRemovida) faccFotoFinal = null;
+
+    if(faccFotoNova){
+      const r = ref(storage, `facc/${id}/${Date.now()}_${faccFotoNova.name}`);
+      await uploadBytes(r, faccFotoNova);
+      faccFotoFinal = await getDownloadURL(r);
+    }
+
+    // 2) upload novas fotos base
+    const novasUrls = [];
+    for(const file of baseFotosNovas){
+      const r = ref(storage, `facc_base/${id}/${Date.now()}_${file.name}`);
+      await uploadBytes(r, file);
+      novasUrls.push(await getDownloadURL(r));
+    }
+
+    // 3) payload completo (mantém tudo + atualiza o que mudou)
+    const payload = {
+      // mantém quaisquer campos que existam e tu não mexes
+      ...original,
+
+      nome: nome.value,
+      sigla: sigla.value,
+      cor: faccColor.value,
+
+      faccFoto: faccFotoFinal,
+
+      hierarquia: {
+        o1, o2, o3,
+        membros
+      },
+
+      produtos,
+
+      base: {
+        nome: baseNome.value,
+        local: baseLocal.value,
+        notas: baseNotas.value
+      },
+
+      baseFotos: [...baseFotosExistentes, ...novasUrls]
+    };
+
+    await updateDoc(faccRef, payload);
+
+await logAction("editou", "caso", title.value.trim());
+
+    // dá um tempinho para garantir UI / overlay antes do redirect
+    await new Promise(r=>setTimeout(r, 200));
+    location.href = "ver.html";
+
+  }catch(err){
+    console.error(err);
+    alert("Erro ao guardar. Vê a consola.");
+    hideGhost();
+  }
+});
+
+/* ===== ELIMINAR ===== */
+deleteBtn.addEventListener("click", async ()=>{
+  if(!confirm("Eliminar definitivamente esta facção?")) return;
+  await showGhost();
+  try{
+    await deleteDoc(faccRef);
+    location.href="ver.html";
+  }catch(err){
+    console.error(err);
+    alert("Erro ao eliminar.");
+    hideGhost();
+    await logAction("apagou", "caso", title.value.trim());
+  }
+});
+</script>
+
+<script>
+agentNameDisplay.textContent=`Agente: ${localStorage.getItem("selectedAgent")||"Desconhecido"}`;
+logoutBtn.onclick=()=>{
+  ["username","selectedAgent","userRole","userCode","isAdmin"].forEach(k=>localStorage.removeItem(k));
+  location.href="../select.html";
+};
+</script>
+
+</body>
+</html>

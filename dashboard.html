@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sistema AURA 💜 - Dashboard</title>
+  <link rel="icon" href="Aurinha.png" />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css" />
+
+  <style>
+    /* --- Sidebar nav pill style (mantendo o mesmo roxo) --- */
+    .sidebar ul li .navlink {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+      color: rgba(255, 255, 255, 0.9);
+      font-weight: 600;
+      padding: 0.6rem 0.9rem;
+      border-radius: 14px;
+      transition: transform 0.12s ease, box-shadow 0.2s ease, background 0.2s ease, color 0.2s ease;
+    }
+
+    .sidebar ul li .navlink .icon {
+      width: 1.4rem;
+      text-align: center;
+      filter: drop-shadow(0 0 6px rgba(180, 107, 255, 0.25));
+    }
+
+    .sidebar ul li .navlink:hover {
+      transform: translateX(3px);
+      background: rgba(180, 107, 255, 0.12);
+      box-shadow: 0 8px 18px rgba(180, 107, 255, 0.18);
+    }
+
+    .sidebar ul li .navlink.active {
+      background: rgba(180, 107, 255, 0.18);
+      box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.06),
+                  0 10px 24px rgba(180, 107, 255, 0.22);
+    }
+
+    /* --- DASHBOARD CARDS MAIORES --- */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); /* cards mais largos */
+      gap: 1.4rem;
+      margin-top: 1.5rem;
+    }
+
+    .stat-card {
+      padding: 1.4rem 1.6rem;              /* mais padding */
+      min-height: 150px;                   /* mais altura */
+      border-radius: 18px;                 /* cantos mais suaves */
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      box-shadow: 0 10px 24px rgba(180, 107, 255, 0.18);
+      transition: transform 0.16s ease, box-shadow 0.2s ease;
+    }
+
+    .stat-card h3 {
+      font-size: 1rem;
+      margin: 0 0 .4rem;
+      opacity: .9;
+    }
+
+    .stat-card p {
+      margin: 0;
+      font-size: 2.4rem;          /* número maior */
+      font-weight: 700;
+      line-height: 1.1;
+    }
+
+    .stat-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 14px 30px rgba(180, 107, 255, 0.28);
+    }
+
+    /* --- LOGO COM FANTASMA (FLUTUAR) --- */
+    .logo-container {
+      position: relative;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: .2rem;
+    }
+
+    .logo-text {
+      font-weight: 700;
+      letter-spacing: 1px;
+    }
+
+    .ghost-logo {
+      width: 60px;
+      position: relative;
+      animation: floatGhost 3.5s ease-in-out infinite;
+      filter: drop-shadow(0 0 12px rgba(180, 107, 255, 0.55));
+    }
+
+    @keyframes floatGhost {
+      0%   { transform: translateY(0); }
+      50%  { transform: translateY(-8px); }
+      100% { transform: translateY(0); }
+    }
+
+    /* ============================================================
+       PULSO AURA (CRIATIVO) - bloco em baixo dos cards
+    ============================================================ */
+
+    .aura-pulse{
+      margin-top: 2.2rem;
+      padding: 1.7rem 1.8rem;
+      border-radius: 20px;
+      background: radial-gradient(1200px 400px at 20% 20%, rgba(180,107,255,0.18), transparent 60%),
+                  rgba(180,107,255,0.07);
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,0.06),
+                  0 16px 34px rgba(180,107,255,0.18);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .pulse-left{
+      display: flex;
+      gap: 1.2rem;
+      align-items: center;
+    }
+
+    .pulse-orb{
+      width: 74px;
+      height: 74px;
+      border-radius: 20px;
+      position: relative;
+      background: rgba(180,107,255,0.12);
+      box-shadow: 0 0 0 1px rgba(255,255,255,0.05) inset,
+                  0 18px 34px rgba(180,107,255,0.22);
+      flex: 0 0 auto;
+    }
+
+    .pulse-orb::before,
+    .pulse-orb::after{
+      content:"";
+      position:absolute;
+      inset: 12px;
+      border-radius: 16px;
+      border: 1px solid rgba(180,107,255,0.35);
+      filter: blur(0.2px);
+      animation: auraWave 2.8s ease-in-out infinite;
+    }
+
+    .pulse-orb::after{
+      inset: 18px;
+      opacity: .6;
+      animation-duration: 3.4s;
+    }
+
+    @keyframes auraWave{
+      0%   { transform: scale(1); opacity: .35; }
+      50%  { transform: scale(1.08); opacity: .8; }
+      100% { transform: scale(1); opacity: .35; }
+    }
+
+    .pulse-text h2{
+      margin: 0 0 .35rem;
+      font-size: 1.15rem;
+    }
+
+    .pulse-line{
+      margin: 0 0 .45rem;
+      opacity: .85;
+      display: flex;
+      align-items: center;
+      gap: .55rem;
+      flex-wrap: wrap;
+    }
+
+    .pulse-status{
+      font-weight: 800;
+      letter-spacing: .2px;
+    }
+
+    .pulse-dot{
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: rgba(180,107,255,0.9);
+      box-shadow: 0 0 14px rgba(180,107,255,0.7);
+      animation: dotBlink 1.2s ease-in-out infinite;
+    }
+
+    @keyframes dotBlink{
+      0%,100% { opacity: .35; transform: scale(.95); }
+      50% { opacity: 1; transform: scale(1.15); }
+    }
+
+    .pulse-quote{
+      margin: 0;
+      opacity: .78;
+      line-height: 1.55;
+      font-style: italic;
+    }
+
+    .pulse-actions{
+      margin-top: .9rem;
+      display: flex;
+      gap: .7rem;
+      flex-wrap: wrap;
+    }
+
+    .pulse-btn{
+      border: 0;
+      padding: .75rem 1rem;
+      border-radius: 16px;
+      cursor: pointer;
+      font-weight: 800;
+      color: rgba(255,255,255,0.92);
+      background: rgba(180,107,255,0.18);
+      box-shadow: 0 12px 26px rgba(180,107,255,0.16);
+      transition: transform .15s ease, box-shadow .2s ease, background .2s ease;
+    }
+
+    .pulse-btn:hover{
+      transform: translateY(-2px);
+      background: rgba(180,107,255,0.24);
+      box-shadow: 0 16px 32px rgba(180,107,255,0.22);
+    }
+
+    .pulse-btn.ghost{
+      background: rgba(0,0,0,0.18);
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,0.06),
+                  0 14px 30px rgba(0,0,0,0.20);
+    }
+
+    .pulse-right{
+      margin-top: 1.2rem;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 1rem;
+    }
+
+    .mini-card{
+      padding: 1rem 1.1rem;
+      border-radius: 16px;
+      background: rgba(0,0,0,0.14);
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,0.04);
+    }
+
+    .mini-card h3{
+      margin: 0 0 .45rem;
+      font-size: 1rem;
+      opacity: .95;
+    }
+
+    .mini-card p{
+      margin: 0;
+      opacity: .75;
+      line-height: 1.55;
+    }
+
+    /* Fantasma “extra” a aparecer por cima do bloco */
+    .pulse-ghost{
+      position: absolute;
+      width: 86px;
+      right: 14px;
+      top: 10px;
+      opacity: 0;
+      transform: translateY(10px) scale(.98);
+      filter: drop-shadow(0 0 18px rgba(180,107,255,0.55));
+      transition: opacity .25s ease, transform .25s ease;
+      pointer-events: none;
+    }
+
+    .pulse-ghost.show{
+      opacity: .95;
+      transform: translateY(0) scale(1);
+      animation: floatGhost2 2.8s ease-in-out infinite;
+    }
+
+    @keyframes floatGhost2{
+      0% { transform: translateY(0) scale(1); }
+      50% { transform: translateY(-10px) scale(1); }
+      100% { transform: translateY(0) scale(1); }
+    }
+  </style>
+</head>
+
+<body>
+  <!-- MENU LATERAL -->
+  <div class="sidebar">
+
+    <!-- LOGO + FANTASMA -->
+    <div class="logo-container">
+      <img src="fantasma_aura_sem_fundo.png" alt="Fantasma Aura" class="ghost-logo">
+      <h2 class="logo-text">SISTEMA AURA</h2>
+    </div>
+
+    <span id="agentNameDisplay" class="agent-display">Agente: -</span>
+
+    <ul>
+      <li><a href="dashboard.html" class="navlink active"><span class="icon">🏠</span><span class="label">Dashboard</span></a></li>
+      <li><a href="pesquisa/ver.html" class="navlink"><span class="icon">🔍</span><span class="label">Pesquisa Geral</span></a></li>
+      <li><a href="perfis/ver.html" class="navlink"><span class="icon">👑</span><span class="label">Perfil da Aura</span></a></li>
+      <li><a href="people/ver.html" class="navlink"><span class="icon">🧍</span><span class="label">Pessoas</span></a></li>
+      <li><a href="casos/ver.html" class="navlink"><span class="icon">📁</span><span class="label">Casos</span></a></li>
+      <li><a href="investigacoes/ver.html" class="navlink"><span class="icon">🕵️</span><span class="label">Investigações</span></a></li>
+      <li><a href="veiculos/ver.html" class="navlink"><span class="icon">🏎️</span><span class="label">Veículos</span></a></li>
+      <li><a href="facc/ver.html" class="navlink"><span class="icon">⚔️</span><span class="label">Facções</span></a></li>
+      <li><a href="perimetro/ver.html" class="navlink"><span class="icon">📍</span><span class="label">Perímetro de Ações</span></a></li>
+      <li><a href="reunioes/ver.html" class="navlink"><span class="icon">🗓️</span><span class="label">Reuniões</span></a></li>
+
+      <!-- AQUI: removi o active do Regras CDA -->
+      <li><a href="regras/ver.html" class="navlink"><span class="icon">📚</span><span class="label">Regras CDA</span></a></li>
+      <li><a href="logs/ver.html" class="navlink"><span class="icon">💻</span><span class="label">Logs</span></a></li>
+
+    </ul>
+
+    <button id="logoutBtn">Sair</button>
+  </div>
+
+  <!-- CONTEÚDO PRINCIPAL -->
+  <div class="main-content">
+    <header>
+      <h1>Visão Geral 🖥️</h1>
+    </header>
+
+    <section class="stats-grid">
+      <div class="stat-card" id="cardPeople">
+        <h3>Pessoas</h3>
+        <p id="countPeople">0</p>
+      </div>
+      <div class="stat-card" id="cardCases">
+        <h3>Casos</h3>
+        <p id="countCases">0</p>
+      </div>
+      <div class="stat-card" id="cardInvestigations">
+        <h3>Investigações</h3>
+        <p id="countInvestigations">0</p>
+      </div>
+      <div class="stat-card" id="cardFacc">
+        <h3>Facções</h3>
+        <p id="countFacc">0</p>
+      </div>
+    </section>
+
+    <!-- 👻 PULSO AURA (CRIATIVO) -->
+    <section class="aura-pulse">
+      <div class="pulse-left">
+        <div class="pulse-orb" aria-hidden="true"></div>
+
+        <div class="pulse-text">
+          <h2>👻 Pulso AURA</h2>
+          <p class="pulse-line">
+            Estado: <span class="pulse-status">Vigilância Ativa</span>
+            <span class="pulse-dot"></span>
+            <span id="pulseTime">sincronizando...</span>
+          </p>
+          <p class="pulse-quote" id="pulseQuote">“O silêncio também é um relatório.”</p>
+
+          <div class="pulse-actions">
+            <button class="pulse-btn" id="btnNewQuote">Nova visão</button>
+            <button class="pulse-btn ghost" id="btnGhostPeek">👻 invocar</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="pulse-right">
+        <div class="mini-card">
+          <h3>📌 Objetivo de hoje</h3>
+          <p id="dailyObjective">Organizar registos e confirmar duplicados.</p>
+        </div>
+        <div class="mini-card">
+          <h3>🧠 Nota AURA</h3>
+          <p>Quanto mais limpo o registo, mais rápida a investigação.</p>
+        </div>
+      </div>
+
+      <img src="fantasma_aura_sem_fundo.png" class="pulse-ghost" id="pulseGhost" alt="Fantasma Aura">
+    </section>
+  </div>
+
+  <script type="module">
+    import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-app.js";
+    import { getFirestore, collection, getDocs }
+      from "https://www.gstatic.com/firebasejs/10.13.1/firebase-firestore.js";
+    import { firebaseConfig } from "./firebaseConfig.js";
+    import { logAction } from "../utils/logger.js";
+
+
+    const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0];
+    const db = getFirestore(app);
+
+    // Exibir o nome do agente logado
+    const agent = localStorage.getItem("selectedAgent") || "Desconhecido";
+    document.getElementById("agentNameDisplay").textContent = `Agente: ${agent}`;
+
+    // Contadores
+    async function updateCounts() {
+      const collections = [
+        { name: "people", elem: "countPeople" },
+        { name: "cases", elem: "countCases" },
+        { name: "investigacoes", elem: "countInvestigations" },
+        { name: "facc", elem: "countFacc" },
+      ];
+
+      for (const c of collections) {
+        const snap = await getDocs(collection(db, c.name));
+        document.getElementById(c.elem).textContent = snap.size;
+      }
+    }
+
+    // Tornar os cartões clicáveis
+    document.getElementById("cardPeople").addEventListener("click", () => window.location.href = "people/ver.html");
+    document.getElementById("cardCases").addEventListener("click", () => window.location.href = "casos/ver.html");
+    document.getElementById("cardInvestigations").addEventListener("click", () => window.location.href = "investigacoes/ver.html");
+    document.getElementById("cardFacc").addEventListener("click", () => window.location.href = "facc/ver.html");
+
+    // Botão Sair
+    const logoutBtn = document.getElementById("logoutBtn");
+    if (logoutBtn) {
+      logoutBtn.addEventListener("click", () => {
+        const keys = ["username","selectedAgent","userRole","userCode","isAdmin"];
+        keys.forEach(k => localStorage.removeItem(k));
+        window.location.href = "select.html";
+      });
+    }
+
+    /* -----------------------------
+       PULSO AURA: hora + frases
+    ------------------------------*/
+    const quotes = [
+      "“O silêncio também é um relatório.”",
+      "“Tudo deixa rasto. AURA só precisa de tempo.”",
+      "“A informação não dorme. Nós também não.”",
+      "“Registo limpo. Estratégia afiada.”",
+      "“Um detalhe muda tudo.”"
+    ];
+
+    const objectives = [
+      "Organizar registos e confirmar duplicados.",
+      "Verificar facções com pouca informação.",
+      "Atualizar os casos mais antigos.",
+      "Rever investigações abertas e notas.",
+      "Padronizar nomes e apelidos nos perfis."
+    ];
+
+    function pick(arr){ return arr[Math.floor(Math.random() * arr.length)]; }
+
+    function updatePulseTime(){
+      const now = new Date();
+      const hh = String(now.getHours()).padStart(2,"0");
+      const mm = String(now.getMinutes()).padStart(2,"0");
+      document.getElementById("pulseTime").textContent = `última leitura: ${hh}:${mm}`;
+    }
+
+    document.getElementById("btnNewQuote").addEventListener("click", () => {
+      document.getElementById("pulseQuote").textContent = pick(quotes);
+      document.getElementById("dailyObjective").textContent = pick(objectives);
+    });
+
+    document.getElementById("btnGhostPeek").addEventListener("click", () => {
+      const g = document.getElementById("pulseGhost");
+      g.classList.add("show");
+      setTimeout(() => g.classList.remove("show"), 2200);
+    });
+
+    // Init
+    updateCounts();
+    updatePulseTime();
+    setInterval(updatePulseTime, 30000);
+  </script>
+</body>
+</html>

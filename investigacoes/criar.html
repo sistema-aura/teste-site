@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8">
+  <title>Criar Investigação — Sistema AURA</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <link rel="icon" href="../Aurinha.png">
+  <link rel="stylesheet" href="../style.css">
+
+  <style>
+    /* === MESMO VISUAL DO CRIAR ANTIGO === */
+    .form-card{
+      max-width:1000px;
+      margin:0 auto;
+      background:rgba(255,255,255,.06);
+      border:1px solid rgba(255,255,255,.08);
+      border-radius:18px;
+      padding:1.6rem 1.8rem;
+      box-shadow:0 18px 40px rgba(180,107,255,.18);
+    }
+
+    .section{margin-top:1.4rem}
+    .section h3{margin:0 0 .7rem;font-size:1rem}
+
+    .form-grid{
+      display:grid;
+      grid-template-columns:repeat(auto-fit,minmax(240px,1fr));
+      gap:14px;
+    }
+
+    .form-group label{
+      display:block;
+      font-size:.85rem;
+      opacity:.85;
+      margin-bottom:4px;
+    }
+
+    input,textarea{
+      width:100%;
+      padding:.75rem .9rem;
+      border-radius:12px;
+      background:rgba(0,0,0,.25);
+      border:1px solid rgba(255,255,255,.08);
+      color:#fff;
+    }
+
+    textarea{resize:vertical}
+
+    .relation-block{
+      background:rgba(180,107,255,.06);
+      border:1px solid rgba(180,107,255,.18);
+      border-radius:16px;
+      padding:1rem 1.1rem;
+      margin-top:1.2rem;
+    }
+
+    .relation-header{
+      font-weight:800;
+      color:#e9d5ff;
+      margin-bottom:.6rem;
+    }
+
+    .search-wrapper{position:relative}
+    .search-wrapper input{
+      padding:.75rem 1rem .75rem 2.6rem;
+      border-radius:14px;
+      background:rgba(0,0,0,.35);
+      border:1px solid rgba(255,255,255,.12);
+    }
+
+    .search-wrapper .icon{
+      position:absolute;
+      left:.9rem;
+      top:50%;
+      transform:translateY(-50%);
+      opacity:.7;
+    }
+
+    .autocomplete-list{
+      position:absolute;
+      top:100%;
+      left:0;
+      right:0;
+      background:rgba(30,0,60,.98);
+      border-radius:12px;
+      margin-top:4px;
+      max-height:180px;
+      overflow-y:auto;
+      display:none;
+      z-index:9999;
+    }
+
+    .autocomplete-item{
+      padding:.55rem .7rem;
+      cursor:pointer;
+      font-size:.8rem;
+    }
+    .autocomplete-item:hover{background:rgba(180,107,255,.22)}
+
+    .chip-list{
+      display:flex;
+      flex-wrap:wrap;
+      gap:8px;
+      margin-top:10px;
+    }
+
+    .chip{
+      background:rgba(168,85,247,.25);
+      border:1px solid rgba(168,85,247,.35);
+      border-radius:999px;
+      padding:.35rem .6rem;
+      font-size:.75rem;
+      font-weight:700;
+      display:flex;
+      align-items:center;
+      gap:6px;
+    }
+    .chip button{
+      background:none;
+      border:none;
+      color:#fff;
+      cursor:pointer;
+      font-weight:900;
+    }
+
+    /* 📸 FOTOS — INTEGRADO */
+    .photo-preview{
+      display:flex;
+      flex-wrap:wrap;
+      gap:12px;
+      margin-top:10px;
+    }
+    .photo-thumb{
+      width:120px;
+      height:120px;
+      border-radius:14px;
+      object-fit:cover;
+      border:1px solid rgba(255,255,255,.18);
+      box-shadow:0 10px 25px rgba(0,0,0,.25);
+    }
+
+    .actions{
+      display:flex;
+      justify-content:flex-end;
+      margin-top:1.8rem;
+    }
+
+    .btn-save{
+      background:linear-gradient(135deg,#a855f7,#7c3aed);
+      border:none;
+      border-radius:14px;
+      padding:.75rem 1.6rem;
+      font-weight:800;
+      color:#fff;
+      cursor:pointer;
+    }
+
+    /* 👻 GHOST */
+    .ghost-overlay{
+      position:fixed;
+      inset:0;
+      background:rgba(20,0,40,.55);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      z-index:9999;
+      backdrop-filter:blur(4px);
+    }
+    .ghost-overlay img{
+      width:140px;
+      animation:ghostFloat 1.6s ease-in-out infinite, ghostSpin 2.8s linear infinite;
+    }
+    @keyframes ghostFloat{50%{transform:translateY(-12px)}}
+    @keyframes ghostSpin{to{rotate:360deg}}
+  </style>
+</head>
+
+<body>
+<!-- ===== Sidebar COMPLETA (do 1) ===== -->
+<div class="sidebar">
+  <h2 class="logo">SISTEMA AURA</h2>
+  <span id="agentNameDisplay" class="agent-display">Agente: -</span>
+    <ul>
+      <li><a href="../dashboard.html" class="navlink active"><span class="icon">🏠</span><span class="label">Dashboard</span></a></li>
+      <li><a href="../pesquisa/ver.html" class="navlink"><span class="icon">🔍</span><span class="label">Pesquisa Geral</span></a></li>
+      <li><a href="../perfis/ver.html" class="navlink"><span class="icon">👑</span><span class="label">Perfil da Aura</span></a></li>
+      <li><a href="../people/ver.html" class="navlink"><span class="icon">🧍</span><span class="label">Pessoas</span></a></li>
+      <li><a href="../casos/ver.html" class="navlink"><span class="icon">📁</span><span class="label">Casos</span></a></li>
+      <li><a href="../investigacoes/ver.html" class="navlink"><span class="icon">🕵️</span><span class="label">Investigações</span></a></li>
+      <li><a href="../veiculos/ver.html" class="navlink"><span class="icon">🏎️</span><span class="label">Veículos</span></a></li>
+      <li><a href="../facc/ver.html" class="navlink"><span class="icon">⚔️</span><span class="label">Facções</span></a></li>
+      <li><a href="../perimetro/ver.html" class="navlink"><span class="icon">📍</span><span class="label">Perímetro de Ações</span></a></li>
+      <li><a href="../reunioes/ver.html" class="navlink"><span class="icon">🗓️</span><span class="label">Reuniões</span></a></li>
+
+      <!-- AQUI: removi o active do Regras CDA -->
+      <li><a href="../regras/ver.html" class="navlink"><span class="icon">📚</span><span class="label">Regras CDA</span></a></li>
+    </ul>
+
+    <button id="logoutBtn">Sair</button>
+  </div>
+
+<div class="main-content">
+  <div class="page-container">
+
+    <div style="display:flex;gap:10px;margin-bottom:1rem">
+      <button class="btn-soft" onclick="history.back()">←</button>
+      <h1>➕ Criar Investigação</h1>
+    </div>
+
+    <form id="createForm" class="form-card">
+
+      <!-- IDENTIFICAÇÃO -->
+      <div class="section">
+        <h3>🧾 Identificação</h3>
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Título</label>
+            <input id="titulo" required>
+          </div>
+          <div class="form-group">
+            <label>Responsável</label>
+            <input id="responsavel">
+          </div>
+        </div>
+      </div>
+
+      <!-- RELAÇÕES -->
+      <div class="relation-block">
+        <div class="relation-header">👥 Envolvidos</div>
+        <div class="search-wrapper">
+          <span class="icon">🔍</span>
+          <input id="peopleSearch">
+          <div id="peopleAuto" class="autocomplete-list"></div>
+        </div>
+        <div id="peopleChips" class="chip-list"></div>
+      </div>
+
+      <div class="relation-block">
+        <div class="relation-header">🚗 Veículos</div>
+        <div class="search-wrapper">
+          <span class="icon">🔍</span>
+          <input id="vehicleSearch">
+          <div id="vehicleAuto" class="autocomplete-list"></div>
+        </div>
+        <div id="vehicleChips" class="chip-list"></div>
+      </div>
+
+      <div class="relation-block">
+        <div class="relation-header">⚔️ Facções</div>
+        <div class="search-wrapper">
+          <span class="icon">🔍</span>
+          <input id="factionSearch">
+          <div id="factionAuto" class="autocomplete-list"></div>
+        </div>
+        <div id="factionChips" class="chip-list"></div>
+      </div>
+
+      <!-- DESCRIÇÃO -->
+      <div class="section">
+        <h3>📎 Descrição</h3>
+        <textarea id="descricao" rows="5"></textarea>
+      </div>
+
+      <!-- 📸 FOTOS -->
+      <div class="section">
+        <h3>📸 Fotos</h3>
+        <input type="file" id="photoInput" accept="image/*" multiple>
+        <div id="photoPreview" class="photo-preview"></div>
+      </div>
+
+      <div class="actions">
+        <button class="btn-save">👻 Guardar Investigação</button>
+      </div>
+
+    </form>
+
+  </div>
+</div>
+
+<script type="module">
+import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-app.js";
+import {
+  getFirestore, collection, getDocs, addDoc, serverTimestamp
+} from "https://www.gstatic.com/firebasejs/10.13.1/firebase-firestore.js";
+import {
+  getStorage, ref, uploadBytes, getDownloadURL
+} from "https://www.gstatic.com/firebasejs/10.13.1/firebase-storage.js";
+import { firebaseConfig } from "../firebaseConfig.js";
+import { logAction } from "../utils/logger.js";
+
+
+const app = getApps().length ? getApps()[0] : initializeApp(firebaseConfig);
+const db = getFirestore(app);
+const storage = getStorage(app);
+
+const selected={ people:[], vehicles:[], factions:[] };
+
+/* 👻 ghost */
+function showGhost(){
+  const g=document.createElement("div");
+  g.className="ghost-overlay";
+  g.innerHTML=`<img src="../fantasma_aura_sem_fundo.png">`;
+  document.body.appendChild(g);
+  return g;
+}
+
+/* 📸 preview */
+const photoInput=document.getElementById("photoInput");
+const photoPreview=document.getElementById("photoPreview");
+let selectedPhotos=[];
+photoInput.onchange=()=>{
+  selectedPhotos=[...photoInput.files];
+  photoPreview.innerHTML="";
+  selectedPhotos.forEach(f=>{
+    const img=document.createElement("img");
+    img.src=URL.createObjectURL(f);
+    img.className="photo-thumb";
+    photoPreview.appendChild(img);
+  });
+};
+
+/* 🔍 autocomplete (IGUAL AO ANTIGO) */
+function setupSearch(inputId,autoId,chipsId,col,key,labelFn){
+  const input=document.getElementById(inputId);
+  const auto=document.getElementById(autoId);
+  const chips=document.getElementById(chipsId);
+  let items=[];
+
+  getDocs(collection(db,col)).then(s=>{
+    items=s.docs.map(d=>({id:d.id,...d.data()}));
+  });
+
+  function add(item){
+    if(selected[key].includes(item.id)) return;
+    selected[key].push(item.id);
+    const chip=document.createElement("span");
+    chip.className="chip";
+    chip.innerHTML=`${labelFn(item)} <button>×</button>`;
+    chip.querySelector("button").onclick=()=>{
+      selected[key]=selected[key].filter(i=>i!==item.id);
+      chip.remove();
+    };
+    chips.appendChild(chip);
+    auto.style.display="none";
+    input.value="";
+  }
+
+  input.oninput=()=>{
+    const q=input.value.toLowerCase();
+    auto.innerHTML="";
+    if(!q){auto.style.display="none";return;}
+    items.filter(i=>labelFn(i).toLowerCase().includes(q))
+      .slice(0,8)
+      .forEach(i=>{
+        const d=document.createElement("div");
+        d.className="autocomplete-item";
+        d.textContent=labelFn(i);
+        d.onclick=()=>add(i);
+        auto.appendChild(d);
+      });
+    auto.style.display=auto.children.length?"block":"none";
+  };
+}
+
+setupSearch("peopleSearch","peopleAuto","peopleChips","people","people",p=>p.name||"Sem nome");
+setupSearch("vehicleSearch","vehicleAuto","vehicleChips","veiculos","vehicles",v=>v.placa||v.modelo);
+setupSearch("factionSearch","factionAuto","factionChips","facc","factions",f=>f.nome||f.sigla);
+
+/* submit */
+createForm.onsubmit=async e=>{
+  e.preventDefault();
+  const ghost=showGhost();
+
+  const urls=[];
+  for(const f of selectedPhotos){
+    const safe=f.name.replace(/[^\w.\-]+/g,"_");
+    const path=`investigacoes_fotos/${Date.now()}_${safe}`;
+    const r=ref(storage,path);
+    await uploadBytes(r,f);
+    urls.push(await getDownloadURL(r));
+  }
+
+  await addDoc(collection(db,"investigacoes"),{
+    titulo:titulo.value.trim(),
+    responsavel:responsavel.value.trim(),
+    descricao:descricao.value.trim(),
+    envolvidos:selected.people,
+    veiculos:selected.vehicles,
+    faccoes:selected.factions,
+    fotos:urls,
+    estado:"ativo",
+    createdAt:serverTimestamp()
+  });
+
+  location.href="ver.html";
+};
+await logAction("criou", "caso", title.value.trim());
+</script>
+
+<script>
+agentNameDisplay.textContent=`Agente: ${localStorage.getItem("selectedAgent")||"Desconhecido"}`;
+logoutBtn.onclick=()=>{
+  ["username","selectedAgent","userRole","userCode","isAdmin"]
+    .forEach(k=>localStorage.removeItem(k));
+  location.href="../select.html";
+};
+</script>
+
+</body>
+</html>

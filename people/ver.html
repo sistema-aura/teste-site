@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Pessoas — Sistema AURA 💜</title>
+
+  <link rel="icon" href="../Aurinha.png" />
+  <link rel="stylesheet" href="../style.css" />
+
+  <style>
+    .page-container { padding: 2rem; }
+
+    .topbar {
+      display:flex; justify-content:space-between; align-items:flex-start;
+      margin-bottom: 1rem; gap: 10px; flex-wrap: wrap;
+    }
+
+    .top-left h1{ margin:0; }
+    .subline{ opacity:.75; margin-top:.25rem; }
+
+    .actions { display:flex; gap:10px; flex-wrap:wrap; align-items:center; }
+
+    .btn{
+      background: linear-gradient(90deg,#9b4dff,#b86bff);
+      border:none; border-radius:12px; color:#fff; font-weight:700;
+      padding:9px 14px; cursor:pointer; transition:.2s;
+      box-shadow:0 0 10px rgba(180,107,255,.25);
+    }
+    .btn:hover{ transform: translateY(-1px); box-shadow:0 12px 26px rgba(180,107,255,.30); }
+
+    .btn-soft{
+      background: rgba(255,255,255,.08);
+      border: 1px solid rgba(255,255,255,.08);
+    }
+
+    .btn-danger{
+      background: linear-gradient(90deg,#ff4d6d,#ff7c6b);
+    }
+
+    /* header stats */
+    .stats{
+      display:grid;
+      grid-template-columns: repeat(auto-fit, minmax(170px,1fr));
+      gap: 12px;
+      margin: 10px 0 14px;
+    }
+    .stat{
+      padding: 12px 14px;
+      border-radius: 16px;
+      background: rgba(255,255,255,.06);
+      border: 1px solid rgba(255,255,255,.06);
+      box-shadow: 0 10px 22px rgba(180,107,255,.12);
+      display:flex; align-items:center; justify-content:space-between;
+    }
+    .stat .k{ opacity:.75; font-weight:700; }
+    .stat .v{ font-size: 1.4rem; font-weight: 800; }
+
+    /* search + filters */
+    .toolbar{
+      display:flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      align-items: center;
+      margin-bottom: 14px;
+    }
+    .searchbar{
+      flex: 1;
+      display:flex;
+      gap: 8px;
+      min-width: 260px;
+    }
+    .searchbar input{
+      flex:1;
+      padding:.85rem 1rem;
+      border-radius: 14px;
+      border:none;
+      background: rgba(255,255,255,.08);
+      color:#fff;
+      outline:none;
+      box-shadow: 0 0 10px rgba(180,107,255,.22);
+    }
+
+    .filter-pills{ display:flex; gap:8px; flex-wrap:wrap; }
+    .pill{
+      padding: .55rem .85rem;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,.08);
+      background: rgba(0,0,0,.14);
+      color: rgba(255,255,255,.92);
+      cursor:pointer;
+      font-weight:800;
+      transition:.15s;
+      user-select:none;
+    }
+    .pill:hover{ transform: translateY(-1px); }
+    .pill.active{
+      background: rgba(180,107,255,.18);
+      box-shadow: 0 10px 22px rgba(180,107,255,.18);
+    }
+
+    /* grid cards */
+    .grid{
+      display:grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 16px;
+    }
+
+    .card{
+      background: rgba(255,255,255,.06);
+      border: 1px solid rgba(255,255,255,.06);
+      border-radius: 18px;
+      padding: 14px;
+      box-shadow: 0 10px 22px rgba(180,107,255,.15);
+      transition: .2s;
+      position: relative;
+      overflow: hidden;
+    }
+    .card:hover{
+      transform: translateY(-3px);
+      box-shadow: 0 14px 30px rgba(180,107,255,.25);
+    }
+
+    .card-head{
+      display:flex;
+      gap: 12px;
+      align-items:center;
+    }
+
+    .avatar{
+      width: 72px; height: 72px;
+      border-radius: 16px;
+      object-fit: cover;
+      box-shadow: 0 0 12px rgba(180,107,255,.35);
+      flex: 0 0 auto;
+    }
+
+    .title{
+      flex: 1;
+      min-width: 0;
+    }
+    .title h3{
+      margin:0;
+      font-size: 1.05rem;
+      white-space: nowrap;
+      overflow:hidden;
+      text-overflow: ellipsis;
+    }
+    .title .phone{
+      margin-top: .25rem;
+      opacity:.85;
+      font-weight:700;
+      display:flex;
+      align-items:center;
+      gap:6px;
+    }
+
+    .chips{
+      display:flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-top: 10px;
+    }
+    .chip{
+      padding: .35rem .65rem;
+      border-radius: 999px;
+      font-size: .78rem;
+      font-weight: 900;
+      border: 1px solid rgba(255,255,255,.08);
+      background: rgba(255,255,255,.06);
+    }
+    .chip.civil{ background: rgba(180,107,255,.10); border-color: rgba(180,107,255,.22); }
+    .chip.pm{ background: rgba(140,255,199,.10); border-color: rgba(140,255,199,.22); }
+    .chip.fac{ background: rgba(255,124,107,.10); border-color: rgba(255,124,107,.22); }
+    .chip.role{ background: rgba(0,0,0,.14); }
+
+    .buttons{
+      display:flex;
+      gap: 8px;
+      margin-top: 12px;
+      flex-wrap: wrap;
+    }
+    .btn-mini{
+      padding: 8px 10px;
+      border-radius: 12px;
+      font-weight: 800;
+      border: 1px solid rgba(255,255,255,.08);
+      background: rgba(255,255,255,.07);
+      color:#fff;
+      cursor:pointer;
+      transition:.15s;
+    }
+    .btn-mini:hover{ transform: translateY(-1px); }
+    .btn-mini.danger{
+      background: rgba(255,124,107,.16);
+      border-color: rgba(255,124,107,.22);
+    }
+
+    .muted{ opacity:.8; }
+
+    /* Toast */
+    .aura-toast{
+      position:fixed; right:16px; bottom:16px; z-index:1200;
+      display:flex; gap:10px; align-items:center;
+      background:rgba(20,0,40,.95); border:1px solid rgba(255,255,255,.08);
+      padding:.7rem 1rem; border-radius:12px; color:#fff;
+      box-shadow:0 10px 24px rgba(180,107,255,.35);
+      animation:fadeIn .15s ease;
+    }
+    .aura-toast.success{ border-color:rgba(140,255,199,.35); }
+    .aura-toast.error{ border-color:rgba(255,124,107,.35); }
+    @keyframes fadeIn{from{opacity:0}to{opacity:1}}
+
+    /* Modal */
+    .aura-modal-wrap{
+      position:fixed; inset:0; background:rgba(0,0,0,.55);
+      display:flex; align-items:center; justify-content:center; padding:20px;
+      z-index:1400; animation:fadeIn .15s ease;
+    }
+    .aura-modal{
+      width:min(560px,95vw);
+      background:rgba(20,0,40,.92);
+      border:1px solid rgba(255,255,255,.08);
+      border-radius:18px;
+      padding:18px;
+      color:#fff;
+      box-shadow:0 18px 40px rgba(180,107,255,.35);
+    }
+    .aura-modal .row{ display:flex; gap:10px; justify-content:flex-end; }
+    .aura-btn{
+      background:rgba(255,255,255,.08);
+      color:#fff;
+      border:1px solid rgba(255,255,255,.08);
+      padding:.6rem .9rem;
+      border-radius:12px;
+      cursor:pointer;
+      font-weight:800;
+    }
+    .aura-btn.primary{ background: linear-gradient(135deg,#b46bff,#9f4dff); border:none; }
+    .only-editor{} /* investigador/admin */
+  </style>
+</head>
+
+<body>
+  <!-- MENU LATERAL -->
+  <div class="sidebar">
+    <h2 class="logo">SISTEMA AURA</h2>
+    <span id="agentNameDisplay" class="agent-display">Agente: -</span>
+
+    <ul>
+      <li><a href="../dashboard.html" class="navlink active"><span class="icon">🏠</span><span class="label">Dashboard</span></a></li>
+      <li><a href="../pesquisa/ver.html" class="navlink"><span class="icon">🔍</span><span class="label">Pesquisa Geral</span></a></li>
+      <li><a href="../perfis/ver.html" class="navlink"><span class="icon">👑</span><span class="label">Perfil da Aura</span></a></li>
+      <li><a href="../people/ver.html" class="navlink"><span class="icon">🧍</span><span class="label">Pessoas</span></a></li>
+      <li><a href="../casos/ver.html" class="navlink"><span class="icon">📁</span><span class="label">Casos</span></a></li>
+      <li><a href="../investigacoes/ver.html" class="navlink"><span class="icon">🕵️</span><span class="label">Investigações</span></a></li>
+      <li><a href="../veiculos/ver.html" class="navlink"><span class="icon">🏎️</span><span class="label">Veículos</span></a></li>
+      <li><a href="../facc/ver.html" class="navlink"><span class="icon">⚔️</span><span class="label">Facções</span></a></li>
+      <li><a href="../perimetro/ver.html" class="navlink"><span class="icon">📍</span><span class="label">Perímetro de Ações</span></a></li>
+      <li><a href="../reunioes/ver.html" class="navlink"><span class="icon">🗓️</span><span class="label">Reuniões</span></a></li>
+
+      <!-- AQUI: removi o active do Regras CDA -->
+      <li><a href="../regras/ver.html" class="navlink"><span class="icon">📚</span><span class="label">Regras CDA</span></a></li>
+    </ul>
+
+    <button id="logoutBtn">Sair</button>
+  </div>
+
+  <div class="main-content">
+    <div class="page-container">
+
+      <div class="topbar">
+        <div class="top-left">
+          <h1>Pessoas</h1>
+          <div class="subline">Gestão rápida de civis, PM e facções.</div>
+        </div>
+
+        <div class="actions">
+          <button id="newBtn" class="btn only-editor">➕ Nova Pessoa</button>
+        </div>
+      </div>
+
+      <section class="stats">
+        <div class="stat"><div class="k">Total</div><div class="v" id="statTotal">0</div></div>
+        <div class="stat"><div class="k">🧍 Civil</div><div class="v" id="statCivil">0</div></div>
+        <div class="stat"><div class="k">👮 PM</div><div class="v" id="statPM">0</div></div>
+        <div class="stat"><div class="k">⚔️ Facção</div><div class="v" id="statFac">0</div></div>
+      </section>
+
+      <div class="toolbar">
+        <div class="searchbar">
+          <input id="searchBar" placeholder="Pesquisar por nome, telefone, tipo ou cargo..." />
+        </div>
+
+        <div class="filter-pills" id="filterPills">
+          <div class="pill active" data-filter="all">✨ Todos</div>
+          <div class="pill" data-filter="civil">🧍 Civil</div>
+          <div class="pill" data-filter="PM">👮 PM</div>
+          <div class="pill" data-filter="fac">⚔️ Facção</div>
+        </div>
+      </div>
+
+      <div id="peopleGrid" class="grid"></div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-app.js";
+    import { getFirestore, collection, getDocs, deleteDoc, doc, query, orderBy } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-firestore.js";
+    import { firebaseConfig } from "../firebaseConfig.js";
+    import { logAction } from "../utils/logger.js";
+
+
+    const app = getApps().length ? getApps()[0] : initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    const grid   = document.getElementById("peopleGrid");
+    const search = document.getElementById("searchBar");
+    const pills  = document.getElementById("filterPills");
+
+    const statTotal = document.getElementById("statTotal");
+    const statCivil = document.getElementById("statCivil");
+    const statPM    = document.getElementById("statPM");
+    const statFac   = document.getElementById("statFac");
+
+    let allPeople = [];
+    let activeFilter = "all";
+
+    // Permissões (igual ao teu)
+    const isAdmin = localStorage.getItem("isAdmin") === "true";
+    const roleStr = (localStorage.getItem("userRole") || "").toLowerCase();
+    const canEdit = isAdmin || roleStr === "investigador";
+
+    document.getElementById("newBtn").onclick = ()=> window.location.href = "criar.html";
+
+    // UI perms
+    document.querySelectorAll(".only-editor").forEach(el => {
+      el.style.display = canEdit ? "" : "none";
+    });
+
+    function toast(msg,type="success"){
+      const t=document.createElement("div");
+      t.className=`aura-toast ${type}`;
+      t.innerHTML=`<span>${type==="success"?"✅":"⚠️"}</span><span>${msg}</span>`;
+      document.body.appendChild(t);
+      setTimeout(()=>{ t.style.opacity="0"; setTimeout(()=>t.remove(),260); }, 1900);
+    }
+
+    function confirmModal({title="Confirmar", message="Tens a certeza?", okText="Confirmar"}){
+      return new Promise(resolve=>{
+        const wrap=document.createElement("div");
+        wrap.className="aura-modal-wrap";
+        wrap.innerHTML=`
+          <div class="aura-modal">
+            <h3 style="margin:0 0 8px;">${title}</h3>
+            <p style="opacity:.9; margin:.2rem 0 1rem;">${message}</p>
+            <div class="row">
+              <button class="aura-btn">Cancelar</button>
+              <button class="aura-btn primary">${okText}</button>
+            </div>
+          </div>`;
+        const [cancelBtn, okBtn] = wrap.querySelectorAll("button");
+        cancelBtn.onclick = ()=>{ wrap.remove(); resolve(false); };
+        okBtn.onclick     = ()=>{ wrap.remove(); resolve(true); };
+        wrap.addEventListener("click",(e)=>{ if(e.target===wrap){ wrap.remove(); resolve(false);} });
+        document.body.appendChild(wrap);
+      });
+    }
+
+    function typeLabel(type){
+      if(type === "PM") return { chip:"pm", text:"👮 PM" };
+      if(type === "fac") return { chip:"fac", text:"⚔️ Facção" };
+      return { chip:"civil", text:"🧍 Civil" };
+    }
+
+    function normalizePhone(phone){
+      // só para mostrar bonito (sem estragar dados antigos)
+      const p = (phone || "").toString().trim();
+      return p || "-";
+    }
+
+    function updateStats(list){
+      const total = list.length;
+      const civil = list.filter(p => (p.type||"") === "civil").length;
+      const pm    = list.filter(p => (p.type||"") === "PM").length;
+      const fac   = list.filter(p => (p.type||"") === "fac").length;
+
+      statTotal.textContent = total;
+      statCivil.textContent = civil;
+      statPM.textContent    = pm;
+      statFac.textContent   = fac;
+    }
+
+    async function loadPeople(){
+      try{
+        const q = query(collection(db,"people"), orderBy("createdAt","desc"));
+        const snap = await getDocs(q);
+        allPeople = snap.docs.map(d => ({ id:d.id, ...d.data() }));
+      }catch{
+        const snap = await getDocs(collection(db,"people"));
+        allPeople = snap.docs.map(d => ({ id:d.id, ...d.data() }));
+        allPeople.sort((a,b)=>{
+          const ta = a.createdAt?.seconds || 0;
+          const tb = b.createdAt?.seconds || 0;
+          return tb - ta;
+        });
+      }
+      applyFilters();
+    }
+
+    function personCard(p){
+      const imgSrc = p.photoURL || "../Aurinha.png";
+      const t = typeLabel(p.type);
+
+      const roleChip = ((p.type==="PM" || p.type==="fac") && (p.role || "").trim())
+        ? `<span class="chip role">🕵️ Cargo: ${(p.role||"").trim()}</span>` : "";
+
+      const editBtns = canEdit ? `
+        <button class="btn-mini" data-act="edit">🖊 Editar</button>
+        <button class="btn-mini danger" data-act="del">🗑 Eliminar</button>
+      ` : "";
+
+      const card = document.createElement("div");
+      card.className = "card";
+
+      card.innerHTML = `
+        <div class="card-head">
+          <img class="avatar" src="${imgSrc}" alt="foto">
+          <div class="title">
+            <h3>${p.name || "Sem nome"}</h3>
+            <div class="phone">📞 <span>${normalizePhone(p.phone)}</span></div>
+          </div>
+        </div>
+
+        <div class="chips">
+          <span class="chip ${t.chip}">${t.text}</span>
+          ${roleChip}
+        </div>
+
+        <div class="buttons">
+          <button class="btn-mini" data-act="view">👁 Ver</button>
+          ${editBtns}
+        </div>
+      `;
+
+      // Ver
+      card.querySelector('[data-act="view"]').onclick = ()=>{
+        const wrap = document.createElement("div");
+        wrap.className="aura-modal-wrap";
+
+        const cargoLine = ((p.type==="PM" || p.type==="fac") && (p.role||"").trim())
+          ? `<p><b>Cargo:</b> ${(p.role||"").trim()}</p>` : "";
+
+        const notesLine = (p.notes || "").trim()
+          ? `<p><b>Notas:</b><br>${(p.notes||"").replace(/\n/g,"<br>")}</p>` : "";
+
+        const photoLine = p.photoURL
+          ? `<p style="margin-top:10px;">
+               <img src="${p.photoURL}" alt="foto"
+                 style="max-width:100%; border-radius:14px; border:1px solid rgba(255,255,255,.08);
+                        box-shadow:0 0 12px rgba(180,107,255,.35);" />
+             </p>` : "";
+
+        wrap.innerHTML=`
+          <div class="aura-modal">
+            <h3 style="margin:0 0 10px;">${p.name || "Sem nome"}</h3>
+            <p><b>Telefone:</b> ${normalizePhone(p.phone)}</p>
+            <p><b>Tipo:</b> ${t.text}</p>
+            ${cargoLine}
+            ${notesLine}
+            ${photoLine}
+            <div class="row"><button class="aura-btn primary">Fechar</button></div>
+          </div>`;
+        wrap.querySelector("button").onclick = ()=> wrap.remove();
+        wrap.addEventListener("click",(e)=>{ if(e.target===wrap) wrap.remove(); });
+        document.body.appendChild(wrap);
+      };
+
+      // Editar
+      card.querySelector('[data-act="edit"]')?.addEventListener("click", ()=>{
+        window.location.href = `editar.html?id=${p.id}`;
+      });
+
+      // Eliminar
+      card.querySelector('[data-act="del"]')?.addEventListener("click", async ()=>{
+        const ok = await confirmModal({
+          title: "Eliminar pessoa",
+          message: `Esta ação é permanente. Queres eliminar <b>${p.name || p.id}</b>?`,
+          okText: "Eliminar"
+        });
+        if(!ok) return;
+
+        try{
+          await deleteDoc(doc(db,"people",p.id));
+          card.remove();
+          toast("Registo eliminado!");
+          // refresh stats without full reload
+          allPeople = allPeople.filter(x => x.id !== p.id);
+          applyFilters();
+        }catch(e){
+          console.error(e);
+          toast("Erro ao eliminar: " + e.message, "error");
+        }
+      });
+
+      return card;
+    }
+
+    function applyFilters(){
+      const t = (search.value || "").toLowerCase().trim();
+
+      let list = allPeople.filter(p=>{
+        const hay = [
+          p.name||"",
+          p.phone||"",
+          p.type||"",
+          p.role||""
+        ].join(" ").toLowerCase();
+        return hay.includes(t);
+      });
+
+      if(activeFilter !== "all"){
+        list = list.filter(p => (p.type || "") === activeFilter);
+      }
+
+      grid.innerHTML = "";
+      if(!list.length){
+        grid.innerHTML = "<p class='muted'>Nenhuma pessoa encontrada.</p>";
+      }else{
+        list.forEach(p => grid.appendChild(personCard(p)));
+      }
+
+      updateStats(list);
+    }
+
+    // Pesquisa
+    search.addEventListener("input", applyFilters);
+
+    // Filtros pills
+    pills.addEventListener("click", (e)=>{
+      const pill = e.target.closest(".pill");
+      if(!pill) return;
+      pills.querySelectorAll(".pill").forEach(p => p.classList.remove("active"));
+      pill.classList.add("active");
+      activeFilter = pill.dataset.filter;
+      applyFilters();
+    });
+
+    loadPeople();
+  </script>
+
+  <script>
+    (function(){
+      const agent = localStorage.getItem("selectedAgent") || "Desconhecido";
+      const el = document.getElementById("agentNameDisplay");
+      if (el) el.textContent = `Agente: ${agent}`;
+
+      const logoutBtn = document.getElementById("logoutBtn");
+      if (logoutBtn) {
+        logoutBtn.addEventListener("click", () => {
+          ["username","selectedAgent","userRole","userCode","isAdmin"].forEach(k => localStorage.removeItem(k));
+          window.location.href = "../select.html";
+        });
+      }
+    })();
+  </script>
+</body>
+</html>

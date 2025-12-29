@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8">
+  <title>Casos Arquivados — Sistema AURA</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <link rel="icon" href="../Aurinha.png">
+  <link rel="stylesheet" href="../style.css">
+
+  <style>
+    .case-card{
+      position:relative;
+      background:rgba(255,255,255,.06);
+      border:1px solid rgba(255,255,255,.08);
+      border-radius:18px;
+      padding:1.3rem 1.4rem;
+      box-shadow:0 16px 35px rgba(180,107,255,.18);
+      margin-bottom:14px;
+    }
+
+    .case-card h3{margin:.2rem 0 .4rem;}
+    .meta{font-size:.85rem;opacity:.85;}
+
+    .actions{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      margin-top:1rem;
+    }
+
+    .btn-soft{
+      background:rgba(180,107,255,.18);
+      border:1px solid rgba(180,107,255,.35);
+      border-radius:14px;
+      padding:.55rem 1.2rem;
+      font-weight:800;
+      color:#fff;
+      cursor:pointer;
+    }
+
+    .btn-danger{
+      background:linear-gradient(135deg,#ff4d6d,#ff7c6b);
+      border:none;
+      border-radius:14px;
+      padding:.55rem 1.2rem;
+      font-weight:900;
+      color:#fff;
+      cursor:pointer;
+    }
+
+    /* 👻 Ghost no card */
+    .ghost-card{
+      position:absolute;
+      inset:0;
+      background:rgba(20,0,40,.6);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      border-radius:300px;
+      z-index:50;
+    }
+
+    .ghost-card img{
+      width:300px;
+      animation:ghostFloat 2.6s ease-in-out infinite,
+               ghostSpin 2.8s linear infinite;
+    }
+
+    @keyframes ghostFloat{
+      0%,100%{transform:translateY(0);}
+      50%{transform:translateY(-12px);}
+    }
+    @keyframes ghostSpin{
+      from{rotate:0deg;}
+      to{rotate:360deg;}
+    }
+  </style>
+</head>
+
+<body>
+
+<div class="sidebar">
+  <h2 class="logo">SISTEMA AURA</h2>
+  <ul>
+    <li><a href="ver.html" class="navlink">📁 Casos</a></li>
+    <li><a href="arquivados.html" class="navlink active">🗃 Arquivados</a></li>
+  </ul>
+  <button id="logoutBtn">Sair</button>
+</div>
+
+<div class="main-content">
+  <div class="page-container">
+    <h1>🗃 Casos Arquivados</h1>
+    <div id="casesGrid"></div>
+  </div>
+</div>
+
+<script type="module">
+import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-app.js";
+import {
+  getFirestore, collection, query, where,
+  getDocs, updateDoc, deleteDoc, doc
+} from "https://www.gstatic.com/firebasejs/10.13.1/firebase-firestore.js";
+import { firebaseConfig } from "../firebaseConfig.js";
+
+const app = getApps().length ? getApps()[0] : initializeApp(firebaseConfig);
+const db = getFirestore(app);
+const grid = document.getElementById("casesGrid");
+
+/* 👻 ghost */
+function showCardGhost(card){
+  const g = document.createElement("div");
+  g.className = "ghost-card";
+  g.innerHTML = `<img src="../fantasma_aura_sem_fundo.png">`;
+  card.appendChild(g);
+  return g;
+}
+
+const q = query(collection(db,"cases"), where("archived","==",true));
+const snap = await getDocs(q);
+
+snap.forEach(d=>{
+  const c={id:d.id,...d.data()};
+
+  const card=document.createElement("div");
+  card.className="case-card";
+  card.innerHTML=`
+    <h3>${c.title||"Sem título"}</h3>
+    <p class="meta"><b>Responsável:</b> ${c.responsible||"-"}</p>
+
+    <div class="actions">
+      <button class="btn-soft reopenBtn">🗃 Reabrir</button>
+      <button class="btn-danger deleteBtn">🗑 Eliminar</button>
+    </div>
+  `;
+
+  card.querySelector(".reopenBtn").onclick=async()=>{
+    const ghost = showCardGhost(card);
+    try{
+      await updateDoc(doc(db,"cases",c.id),{archived:false});
+      card.remove();
+    }finally{
+      ghost.remove();
+
+await logAction("editou", "caso", title.value.trim());
+    }
+  };
+
+  card.querySelector(".deleteBtn").onclick=async()=>{
+    if(!confirm("Eliminar definitivamente este caso?")) return;
+    const ghost = showCardGhost(card);
+    try{
+      await deleteDoc(doc(db,"cases",c.id));
+      card.remove();
+    }finally{
+      ghost.remove();
+      await logAction("apagou", "caso", title.value.trim());
+    }
+  };
+
+  grid.appendChild(card);
+});
+</script>
+
+<script>
+logoutBtn.onclick=()=>{
+  ["username","selectedAgent","userRole","userCode","isAdmin"]
+    .forEach(k=>localStorage.removeItem(k));
+  location.href="../select.html";
+};
+</script>
+
+</body>
+</html>

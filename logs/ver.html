@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Histórico de Logs — Sistema AURA</title>
+
+  <link rel="stylesheet" href="../style.css" />
+
+  <style>
+    .page-container { padding: 2rem; }
+
+    .topbar{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      flex-wrap:wrap;
+      gap:12px;
+      margin-bottom: 1rem;
+    }
+
+    .left-info {
+      display:flex;
+      flex-direction:column;
+      gap:4px;
+    }
+
+    .user-online {
+      font-size:.9rem;
+      opacity:.8;
+    }
+
+    .btn {
+      background: linear-gradient(90deg,#9b4dff,#b86bff);
+      border:none;
+      border-radius:10px;
+      padding:.6rem 1rem;
+      color:white;
+      font-weight:600;
+      cursor:pointer;
+      box-shadow:0 0 10px rgba(180,107,255,.3);
+    }
+
+    .btn-danger {
+      background: linear-gradient(90deg,#ff4d6d,#ff7a7a);
+    }
+
+    .searchbar{
+      display:flex;
+      gap:10px;
+      margin:.8rem 0 1.2rem;
+    }
+
+    .searchbar input{
+      flex:1;
+      padding:.85rem 1rem;
+      background:rgba(255,255,255,.08);
+      border:none;
+      border-radius:12px;
+      color:#fff;
+      outline:none;
+    }
+
+    .log-card{
+      display:flex;
+      gap:14px;
+      align-items:flex-start;
+      background:rgba(255,255,255,.06);
+      border:1px solid rgba(255,255,255,.08);
+      border-radius:16px;
+      padding:14px;
+      margin-bottom:12px;
+      box-shadow:0 10px 22px rgba(180,107,255,.12);
+    }
+
+    .avatar{
+      width:42px;
+      height:42px;
+      border-radius:50%;
+      background:linear-gradient(135deg,#9b4dff,#b86bff);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-weight:800;
+      color:white;
+    }
+
+    .content{ flex:1; }
+
+    .row1{
+      display:flex;
+      gap:10px;
+      align-items:center;
+      flex-wrap:wrap;
+    }
+
+    .tag{
+      padding:.25rem .6rem;
+      border-radius:8px;
+      font-size:.75rem;
+      font-weight:700;
+      background:rgba(255,255,255,.1);
+    }
+
+    .tag-create { background: rgba(140,255,199,.18); }
+    .tag-edit { background: rgba(255,193,7,.18); }
+    .tag-delete { background: rgba(255,124,107,.18); }
+
+    .meta{
+      font-size:.75rem;
+      opacity:.6;
+      margin-top:4px;
+    }
+
+    .empty {
+      opacity:.7;
+      text-align:center;
+      margin-top:2rem;
+    }
+  </style>
+</head>
+
+<body>
+
+<script>
+  const isAdmin = localStorage.getItem("isAdmin") === "true";
+  if (!isAdmin) {
+    alert("Acesso negado.");
+    window.location.href = "../dashboard.html";
+  }
+</script>
+
+<div class="main-content">
+  <div class="page-container">
+
+    <div class="topbar">
+      <div class="left-info">
+        <h1>📜 Histórico do Sistema</h1>
+        <span class="user-online">
+          Utilizador ativo: <b id="currentUser">---</b>
+        </span>
+      </div>
+
+      <div style="display:flex; gap:10px;">
+        <button class="btn" onclick="window.location.href='../dashboard.html'">
+          ⬅ Voltar
+        </button>
+
+        <button id="clearLogsBtn" class="btn btn-danger">
+          🗑 Limpar Logs
+        </button>
+      </div>
+    </div>
+
+    <div class="searchbar">
+      <input id="search" placeholder="Pesquisar por utilizador, ação, item..." />
+    </div>
+
+    <div id="logs"></div>
+
+  </div>
+</div>
+
+<script type="module">
+  import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-app.js";
+  import { 
+    getFirestore, 
+    collection, 
+    getDocs, 
+    query, 
+    orderBy, 
+    limit,
+    deleteDoc,
+    doc
+  } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-firestore.js";
+
+  import { firebaseConfig } from "../firebaseConfig.js";
+
+  const app = getApps().length ? getApps()[0] : initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+
+  const logsBox = document.getElementById("logs");
+  const searchInput = document.getElementById("search");
+  const currentUser = localStorage.getItem("selectedAgent") || "Desconhecido";
+
+  document.getElementById("currentUser").textContent = currentUser;
+
+  let allLogs = [];
+
+  function initials(name){
+    return (name || "??")
+      .split(" ")
+      .slice(0,2)
+      .map(n => n[0])
+      .join("")
+      .toUpperCase();
+  }
+
+  function tagClass(action){
+    if (!action) return "";
+    if (action.includes("criou")) return "tag-create";
+    if (action.includes("editou")) return "tag-edit";
+    if (action.includes("apagou")) return "tag-delete";
+    return "";
+  }
+
+  function render(logs){
+    logsBox.innerHTML = "";
+
+    if(!logs.length){
+      logsBox.innerHTML = `<p class="empty">Nenhum registo encontrado.</p>`;
+      return;
+    }
+
+    logs.forEach(l => {
+      const name = l.userName || l.user || "Desconhecido";
+      const date = l.timestamp?.toDate?.();
+      const when = date ? date.toLocaleString("pt-PT") : "";
+
+      const card = document.createElement("div");
+      card.className = "log-card";
+
+      card.innerHTML = `
+        <div class="avatar">${initials(name)}</div>
+        <div class="content">
+          <div class="row1">
+            <b>${name}</b>
+            <span class="tag ${tagClass(l.action)}">${l.action}</span>
+            <span class="tag">${l.itemType}</span>
+          </div>
+          <div>${l.itemName || ""}</div>
+          <div class="meta">${when}</div>
+        </div>
+      `;
+
+      logsBox.appendChild(card);
+    });
+  }
+
+  async function loadLogs(){
+    const q = query(collection(db,"logs"), orderBy("timestamp","desc"), limit(300));
+    const snap = await getDocs(q);
+    allLogs = snap.docs.map(d => d.data());
+    render(allLogs);
+  }
+
+  searchInput.addEventListener("input", () => {
+    const v = searchInput.value.toLowerCase();
+    if(!v) return render(allLogs);
+
+    const filtered = allLogs.filter(l =>
+      (l.userName || l.user || "").toLowerCase().includes(v) ||
+      (l.itemType || "").toLowerCase().includes(v) ||
+      (l.itemName || "").toLowerCase().includes(v)
+    );
+
+    render(filtered);
+  });
+
+  document.getElementById("clearLogsBtn").addEventListener("click", async () => {
+    if (!confirm("Tens a certeza que queres apagar TODOS os logs?")) return;
+
+    const snap = await getDocs(collection(db, "logs"));
+
+    for (const d of snap.docs) {
+      await deleteDoc(doc(db, "logs", d.id));
+    }
+
+    alert("Logs apagados com sucesso!");
+    loadLogs();
+  });
+
+  await loadLogs();
+</script>
+
+</body>
+</html>

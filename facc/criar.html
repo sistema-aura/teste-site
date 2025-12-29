@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="UTF-8">
+<title>Criar Facção — Sistema AURA</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<link rel="icon" href="../Aurinha.png">
+<link rel="stylesheet" href="../style.css">
+
+<style>
+/* ====== OVERLAY FANTASMA ====== */
+.ghost-overlay{
+  position:fixed;
+  inset:0;
+  background:rgba(15,10,30,.85);
+  backdrop-filter: blur(8px);
+  display:none;
+  align-items:center;
+  justify-content:center;
+  z-index:99999;
+}
+
+.ghost-wrap{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:16px;
+}
+
+.ghost-img{
+  width:350px;
+  animation: float 2.5s ease-in-out infinite;
+  filter: drop-shadow(0 0 25px rgba(180,80,255,.6));
+}
+
+.ghost-text{
+  color:#e9d5ff;
+  font-weight:900;
+  font-size:1.1rem;
+}
+
+@keyframes float {
+  0% { transform: translateY(0px); }
+  50% { transform: translateY(-12px); }
+  100% { transform: translateY(0px); }
+}
+
+/* ====== Form / Visual ====== */
+.form-card{
+  max-width:1100px;margin:0 auto;
+  background:rgba(255,255,255,.06);
+  border:1px solid rgba(255,255,255,.08);
+  border-radius:18px;
+  padding:1.6rem;
+}
+.section{margin-top:1.6rem}
+.form-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px}
+input,textarea{
+  width:100%;padding:.75rem;border-radius:12px;
+  background:rgba(0,0,0,.25);
+  border:1px solid rgba(255,255,255,.08);
+  color:#fff
+}
+.search-wrapper{position:relative}
+.autocomplete-list{
+  position:absolute;top:100%;left:0;right:0;
+  background:#1b0033;border-radius:12px;
+  max-height:180px;overflow-y:auto;
+  display:none;z-index:9999
+}
+.autocomplete-item{padding:.55rem;cursor:pointer}
+.autocomplete-item:hover{background:rgba(180,107,255,.3)}
+.chip{
+  background:#a855f733;
+  padding:.35rem .6rem;
+  border-radius:999px;
+  display:inline-flex;
+  gap:6px;
+  margin:4px;
+}
+.photo-preview{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px}
+.photo-thumb{width:120px;height:120px;border-radius:14px;object-fit:cover}
+.actions{display:flex;gap:12px;margin-top:2rem;flex-wrap:wrap}
+.btn-save{background:#7c3aed;border:none;padding:.8rem 1.6rem;border-radius:14px;color:#fff;font-weight:800;cursor:pointer}
+.btn-back{background:rgba(255,255,255,.10);border:1px solid rgba(255,255,255,.15);padding:.8rem 1.2rem;border-radius:14px;color:#fff;font-weight:800;cursor:pointer}
+.color-preview{
+  width:70px;height:45px;border-radius:12px;
+  box-shadow:0 0 10px rgba(0,0,0,.4);
+}
+a{ text-decoration:none; }
+</style>
+</head>
+
+<body>
+
+<!-- Overlay fantasma -->
+<div class="ghost-overlay" id="ghostOverlay">
+  <div class="ghost-wrap">
+    <img src="../fantasma_aura_sem_fundo.png" class="ghost-img">
+    <div class="ghost-text">A guardar...</div>
+  </div>
+</div>
+
+<div class="sidebar">
+  <h2 class="logo">SISTEMA AURA</h2>
+  <span id="agentNameDisplay"></span>
+
+    <ul>
+      <li><a href=".../dashboard.html" class="navlink active"><span class="icon">🏠</span><span class="label">Dashboard</span></a></li>
+      <li><a href="../pesquisa/ver.html" class="navlink"><span class="icon">🔍</span><span class="label">Pesquisa Geral</span></a></li>
+      <li><a href="../perfis/ver.html" class="navlink"><span class="icon">👑</span><span class="label">Perfil da Aura</span></a></li>
+      <li><a href="../people/ver.html" class="navlink"><span class="icon">🧍</span><span class="label">Pessoas</span></a></li>
+      <li><a href="../casos/ver.html" class="navlink"><span class="icon">📁</span><span class="label">Casos</span></a></li>
+      <li><a href="../investigacoes/ver.html" class="navlink"><span class="icon">🕵️</span><span class="label">Investigações</span></a></li>
+      <li><a href="../veiculos/ver.html" class="navlink"><span class="icon">🏎️</span><span class="label">Veículos</span></a></li>
+      <li><a href="facc/ver.html" class="navlink"><span class="icon">⚔️</span><span class="label">Facções</span></a></li>
+      <li><a href="../perimetro/ver.html" class="navlink"><span class="icon">📍</span><span class="label">Perímetro de Ações</span></a></li>
+      <li><a href="../reunioes/ver.html" class="navlink"><span class="icon">🗓️</span><span class="label">Reuniões</span></a></li>
+
+      <!-- AQUI: removi o active do Regras CDA -->
+      <li><a href="../regras/ver.html" class="navlink"><span class="icon">📚</span><span class="label">Regras CDA</span></a></li>
+    </ul>
+
+    <button id="logoutBtn">Sair</button>
+  </div>
+
+<div class="main-content">
+<div class="page-container">
+
+<h1>➕ Criar Facção</h1>
+
+<form id="createForm" class="form-card">
+
+  <!-- IDENTIFICAÇÃO -->
+  <div class="section">
+    <h3>🧾 Identificação</h3>
+    <div class="form-grid">
+      <input id="nome" placeholder="Nome" required>
+      <input id="sigla" placeholder="Sigla">
+    </div>
+  </div>
+
+  <!-- COR -->
+  <div class="section">
+    <h3>🎨 Cor da Facção</h3>
+    <div style="display:flex;gap:15px;align-items:center">
+      <input type="color" id="faccColor" value="#7c3aed">
+      <div id="colorPreview" class="color-preview"></div>
+    </div>
+  </div>
+
+  <!-- FOTO FACÇÃO -->
+  <div class="section">
+    <h3>📸 Foto da Facção</h3>
+    <input type="file" id="faccPhoto" accept="image/*">
+    <div id="faccPreview" class="photo-preview"></div>
+  </div>
+
+  <!-- HIERARQUIA -->
+  <div class="section">
+    <h3>👑 Hierarquia</h3>
+
+    <div class="form-grid">
+      <div class="search-wrapper">
+        <input id="o1Input" placeholder="01">
+        <div class="autocomplete-list"></div>
+      </div>
+      <div class="search-wrapper">
+        <input id="o2Input" placeholder="02">
+        <div class="autocomplete-list"></div>
+      </div>
+      <div class="search-wrapper">
+        <input id="o3Input" placeholder="03">
+        <div class="autocomplete-list"></div>
+      </div>
+    </div>
+
+    <div class="search-wrapper">
+      <input id="membrosInput" placeholder="Adicionar membros">
+      <div class="autocomplete-list"></div>
+    </div>
+
+    <div id="membrosChips" class="chip-list"></div>
+  </div>
+
+  <!-- PRODUTOS -->
+  <div class="section">
+    <h3>📦 Produtos</h3>
+    <input id="productInput" placeholder="Produto (Enter para adicionar)">
+    <div id="productList" class="chip-list"></div>
+  </div>
+
+  <!-- BASE -->
+  <div class="section">
+    <h3>🏠 Base</h3>
+    <input id="baseNome" placeholder="Nome da base">
+    <input id="baseLocal" placeholder="Localização">
+    <textarea id="baseNotas" placeholder="Notas"></textarea>
+  </div>
+
+  <!-- FOTOS BASE -->
+  <div class="section">
+    <h3>📸 Fotos da Base</h3>
+    <input type="file" id="photoInput" multiple>
+    <div id="photoPreview" class="photo-preview"></div>
+  </div>
+
+  <div class="actions">
+    <button type="button" class="btn-back" onclick="location.href='ver.html'">⬅ Voltar</button>
+    <button class="btn-save">💾 Criar</button>
+  </div>
+
+</form>
+
+</div>
+</div>
+
+<script type="module">
+import { initializeApp,getApps } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-app.js";
+import { getFirestore,collection,getDocs,addDoc } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-firestore.js";
+import { getStorage,ref,uploadBytes,getDownloadURL } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-storage.js";
+import { firebaseConfig } from "../firebaseConfig.js";
+import { logAction } from "../utils/logger.js";
+
+
+const app=getApps().length?getApps()[0]:initializeApp(firebaseConfig);
+const db=getFirestore(app);
+const storage=getStorage(app);
+
+const ghostOverlay=document.getElementById("ghostOverlay");
+const colorPreview=document.getElementById("colorPreview");
+
+function showGhost(){ ghostOverlay.style.display="flex"; }
+function hideGhost(){ ghostOverlay.style.display="none"; }
+
+/* COR preview */
+colorPreview.style.background = faccColor.value;
+faccColor.oninput = ()=> colorPreview.style.background = faccColor.value;
+
+/* FOTO FACÇÃO preview */
+let faccPhotoFile=null;
+faccPhoto.onchange=()=>{
+  const f=faccPhoto.files[0];
+  faccPhotoFile = f || null;
+  faccPreview.innerHTML="";
+  if(!f) return;
+  const img=document.createElement("img");
+  img.src=URL.createObjectURL(f);
+  img.className="photo-thumb";
+  faccPreview.appendChild(img);
+};
+
+/* PEOPLE */
+const PEOPLE=(await getDocs(collection(db,"people"))).docs.map(d=>({id:d.id,label:d.data().name}));
+
+let o1=null,o2=null,o3=null,membros=[];
+
+/* AUTOCOMPLETE (com opção de limpar input ao escolher) */
+let globalACBound=false;
+function autocomplete(input,data,onPick,{blocked=[],clearOnPick=false}={}){
+  const box=input.nextElementSibling;
+
+  input.addEventListener("input", ()=>{
+    const q=input.value.toLowerCase().trim();
+    box.innerHTML="";
+    if(!q){ box.style.display="none"; return; }
+
+    data
+      .filter(p=>p.label.toLowerCase().includes(q) && !blocked.includes(p.id))
+      .slice(0,8)
+      .forEach(p=>{
+        const d=document.createElement("div");
+        d.className="autocomplete-item";
+        d.textContent=p.label;
+        d.onclick=()=>{
+          onPick(p);
+          input.value = clearOnPick ? "" : p.label;
+          box.style.display="none";
+          input.focus();
+        };
+        box.appendChild(d);
+      });
+
+    box.style.display = box.children.length ? "block" : "none";
+  });
+
+  if(!globalACBound){
+    globalACBound=true;
+    document.addEventListener("click",(e)=>{
+      document.querySelectorAll(".autocomplete-list").forEach(el=>{
+        const inp=el.previousElementSibling;
+        if(!inp) return;
+        if(el.contains(e.target) || inp.contains(e.target)) return;
+        el.style.display="none";
+      });
+    });
+  }
+}
+
+/* HIERARQUIA */
+function pick(role,p){
+  if([o1,o2,o3].includes(p.id)) return;
+
+  if(role==="o1"){ o1=p.id; o1Input.value=p.label; }
+  if(role==="o2"){ o2=p.id; o2Input.value=p.label; }
+  if(role==="o3"){ o3=p.id; o3Input.value=p.label; }
+}
+
+autocomplete(o1Input,PEOPLE,p=>pick("o1",p),{blocked:[o2,o3],clearOnPick:false});
+autocomplete(o2Input,PEOPLE,p=>pick("o2",p),{blocked:[o1,o3],clearOnPick:false});
+autocomplete(o3Input,PEOPLE,p=>pick("o3",p),{blocked:[o1,o2],clearOnPick:false});
+
+/* MEMBROS (aqui LIMPA o input ao escolher) */
+function addMemberChip(p){
+  const c=document.createElement("span");
+  c.className="chip";
+  c.innerHTML=`${p.label}<button type="button">×</button>`;
+  c.querySelector("button").onclick=()=>{
+    membros=membros.filter(i=>i!==p.id);
+    c.remove();
+  };
+  membrosChips.appendChild(c);
+}
+
+autocomplete(membrosInput,PEOPLE,(p)=>{
+  if([o1,o2,o3].includes(p.id) || membros.includes(p.id)) return;
+  membros.push(p.id);
+  addMemberChip(p);
+},{blocked:membros,clearOnPick:true});
+
+/* PRODUTOS */
+let produtos=[];
+function addProductChip(txt){
+  const c=document.createElement("span");
+  c.className="chip";
+  c.innerHTML=`${txt}<button type="button">×</button>`;
+  c.querySelector("button").onclick=()=>{
+    produtos=produtos.filter(x=>x!==txt);
+    c.remove();
+  };
+  productList.appendChild(c);
+}
+productInput.onkeydown=(e)=>{
+  if(e.key==="Enter"){
+    e.preventDefault();
+    const val=productInput.value.trim();
+    if(!val) return;
+    produtos.push(val);
+    addProductChip(val);
+    productInput.value="";
+  }
+};
+
+/* FOTOS BASE preview */
+let fotosBaseFiles=[];
+photoInput.onchange=()=>{
+  fotosBaseFiles=[...photoInput.files];
+  photoPreview.innerHTML="";
+  fotosBaseFiles.forEach(f=>{
+    const img=document.createElement("img");
+    img.src=URL.createObjectURL(f);
+    img.className="photo-thumb";
+    photoPreview.appendChild(img);
+  });
+};
+
+/* SUBMIT */
+createForm.onsubmit=async (e)=>{
+  e.preventDefault();
+  showGhost();
+
+  try{
+    // upload foto facção (opcional)
+    let faccFotoURL=null;
+    if(faccPhotoFile){
+      const r=ref(storage,`facc/${Date.now()}_${faccPhotoFile.name}`);
+      await uploadBytes(r,faccPhotoFile);
+      faccFotoURL=await getDownloadURL(r);
+    }
+
+    // upload fotos base (opcional)
+    const baseFotos=[];
+    for(const f of fotosBaseFiles){
+      const r=ref(storage,`facc_base/${Date.now()}_${f.name}`);
+      await uploadBytes(r,f);
+      baseFotos.push(await getDownloadURL(r));
+    }
+
+    await addDoc(collection(db,"facc"),{
+      nome:nome.value,
+      sigla:sigla.value,
+      cor:faccColor.value,
+      faccFoto:faccFotoURL,
+      hierarquia:{ o1,o2,o3,membros },
+      produtos,
+      base:{
+        nome:baseNome.value,
+        local:baseLocal.value,
+        notas:baseNotas.value
+      },
+      baseFotos
+    });
+    await logAction("criou", "caso", title.value.trim());
+
+    location.href="ver.html";
+  }catch(err){
+    console.error(err);
+    alert("Erro ao criar. Vê a consola.");
+    hideGhost();
+  }
+};
+</script>
+
+<script>
+agentNameDisplay.textContent=`Agente: ${localStorage.getItem("selectedAgent")||"Desconhecido"}`;
+logoutBtn.onclick=()=>{
+  ["username","selectedAgent","userRole","userCode","isAdmin"].forEach(k=>localStorage.removeItem(k));
+  location.href="../select.html";
+};
+</script>
+
+</body>
+</html>

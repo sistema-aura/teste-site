@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sistema AURA 💜 — Seleção de Usuário</title>
+  <link rel="icon" href="Aurinha.png" />
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    body {
+      background: radial-gradient(circle at top left, #3c0064, #150026);
+      color: white;
+      font-family: 'Poppins', sans-serif;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      margin: 0;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .ghost {
+      position: absolute;
+      width: 600px;
+      opacity: 0.30;
+      z-index: 0;
+      animation: floatGhost 20s linear infinite alternate;
+    }
+
+/* Suavemente aumenta e diminui o brilho */
+@keyframes pulseGlow {
+  0%, 100% {
+    filter: drop-shadow(0 0 6px rgba(180, 107, 255, 0.3));
+  }
+  50% {
+    filter: drop-shadow(0 0 20px rgba(180, 107, 255, 0.6));
+  }
+}
+    @keyframes floatGhost {
+      0% {
+        top: 10%;
+        left: -15%;
+        transform: rotate(0deg);
+      }
+      50% {
+        top: 40%;
+        left: 70%;
+        transform: rotate(10deg);
+      }
+      100% {
+        top: 5%;
+        left: 85%;
+        transform: rotate(-8deg);
+      }
+    }
+
+    .select-container {
+      z-index: 1;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 20px;
+      box-shadow: 0 0 20px rgba(180,107,255,0.3);
+      padding: 2rem 3rem;
+      text-align: center;
+      backdrop-filter: blur(12px);
+      width: 400px;
+    }
+
+    input[type="text"] {
+      width: 100%;
+      padding: 0.8rem;
+      border-radius: 10px;
+      border: none;
+      background: rgba(255,255,255,0.1);
+      color: white;
+      font-size: 1rem;
+      outline: none;
+      box-shadow: 0 0 10px rgba(180,107,255,0.2);
+      margin-bottom: 1rem;
+    }
+
+    .suggestions {
+      background: #1a002e;
+      color: white;
+      border-radius: 10px;
+      max-height: 200px;
+      overflow-y: auto;
+      box-shadow: 0 0 10px rgba(180,107,255,0.2);
+      margin-bottom: 1.5rem;
+    }
+
+    .suggestions div {
+      padding: 0.7rem 1rem;
+      cursor: pointer;
+    }
+
+    .suggestions div:hover {
+      background: rgba(180,107,255,0.2);
+    }
+
+    button {
+      width: 100%;
+      padding: 0.8rem;
+      background: #b46bff;
+      border: none;
+      border-radius: 10px;
+      color: white;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+
+    button:hover {
+      background: #9f4dff;
+      box-shadow: 0 0 12px rgba(180,107,255,0.4);
+    }
+
+    img.logo {
+      width: 90px;
+      filter: drop-shadow(0 0 8px rgba(180,107,255,0.6));
+    }
+  </style>
+</head>
+
+<body>
+  <!-- 👻 Fantasma animado -->
+  <img src="fantasma_aura_sem_fundo.png" alt="fantasma" class="ghost" />
+
+  <!-- 🔲 Caixa de seleção -->
+  <div class="select-container">
+    <img src="Aurinha.png" alt="Logo AURA" class="logo" />
+    <h1>Selecione o Usuário 💜</h1>
+    <input type="text" id="userInput" placeholder="Digite seu nome..." autocomplete="off" />
+    <div id="suggestions" class="suggestions"></div>
+    <button id="btnEntrar">Entrar no Sistema</button>
+  </div>
+
+  <script type="module">
+    import { app, db } from "./firebaseConfig.js";
+    import { collection, getDocs } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-firestore.js";
+
+
+    let allUsers = [];
+
+    document.addEventListener("DOMContentLoaded", async () => {
+      const input = document.getElementById("userInput");
+      const suggestions = document.getElementById("suggestions");
+      const btnEntrar = document.getElementById("btnEntrar");
+
+      try {
+        const querySnapshot = await getDocs(collection(db, "users"));
+        querySnapshot.forEach(doc => {
+          allUsers.push(doc.data().name);
+        });
+      } catch (err) {
+        alert("Erro ao carregar usuários. Verifique a conexão.");
+      }
+
+      input.addEventListener("input", () => {
+        const val = input.value.toLowerCase();
+        suggestions.innerHTML = "";
+        if (val) {
+          const matches = allUsers.filter(name => name.toLowerCase().includes(val));
+          matches.forEach(name => {
+            const div = document.createElement("div");
+            div.textContent = name;
+            div.addEventListener("click", () => {
+              input.value = name;
+              suggestions.innerHTML = "";
+            });
+            suggestions.appendChild(div);
+          });
+        }
+      });
+
+btnEntrar.addEventListener("click", () => {
+  const username = input.value.trim();
+  if (!username || !allUsers.includes(username)) {
+    alert("Usuário inválido. Selecione da lista.");
+    return;
+  }
+
+  // 🔥 ADICIONAR ISTO
+  localStorage.setItem("selectedAgent", username);
+
+  // (opcional, mas podes manter)
+  localStorage.setItem("username", username);
+
+  window.location.href = "/index.html";
+});
+
+    });
+  </script>
+</body>
+</html>

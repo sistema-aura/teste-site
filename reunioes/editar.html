@@ -510,7 +510,13 @@
           fileName: fileData.fileName || null,
           fileType: fileData.fileType || null
         });
-             await logAction("editou", "caso", title.value.trim());
+             await updateDoc(doc(db,"reunioes", id), dadosAtualizados);
+
+             await logAction(
+               "editou",
+               "reunião",
+               tituloEl.value.trim() || `Reunião ${dataEl.value}`
+             );
 
         toast("Reunião atualizada!");
         setTimeout(()=> window.location.href="ver.html", 900);

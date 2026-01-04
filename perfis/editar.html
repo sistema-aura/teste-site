@@ -374,7 +374,8 @@
         toast("Perfil eliminado!","success");
         setTimeout(()=> location.href = "ver.html", 600);
       }catch(e){ console.error(e); toast("Erro ao eliminar.","error"); }
-      await logAction("apagou", "caso", title.value.trim());
+        await logAction("apagou", "perfil", nameEl.value.trim());
+
     });
   </script>
 

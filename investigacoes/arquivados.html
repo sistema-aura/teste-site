@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8">
+  <title>Investigações Arquivadas — Sistema AURA</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <link rel="icon" href="../Aurinha.png">
+  <link rel="stylesheet" href="../style.css">
+
+  <style>
+    a{ text-decoration:none!important }
+
+    .agent-display{font-size:.85rem;opacity:.85;margin-bottom:12px;display:block}
+
+    .top-row{
+      display:flex;justify-content:space-between;align-items:center;
+      gap:12px;margin-bottom:1rem;flex-wrap:wrap
+    }
+    .top-left{display:flex;align-items:center;gap:10px}
+
+    .btn-soft{
+      background:rgba(180,107,255,.18);
+      border:1px solid rgba(180,107,255,.35);
+      border-radius:14px;
+      padding:.6rem 1.2rem;
+      font-weight:800;
+      color:#fff;
+      cursor:pointer;
+    }
+
+    .btn-main{
+      background:linear-gradient(135deg,#a855f7,#7c3aed);
+      border:none;border-radius:14px;
+      padding:.6rem 1.4rem;
+      font-weight:900;color:#fff;
+      cursor:pointer;
+    }
+
+    .btn-danger{
+      background:linear-gradient(135deg,#ff4d6d,#ff7c6b);
+      border:none;border-radius:14px;
+      padding:.6rem 1.2rem;
+      font-weight:900;color:#fff;
+      cursor:pointer;
+    }
+
+    .search-wrapper{margin:.4rem 0 1.2rem}
+    .search-wrapper input{
+      width:100%;
+      padding:.85rem 1rem;
+      border-radius:14px;
+      background:rgba(0,0,0,.35);
+      border:1px solid rgba(255,255,255,.12);
+      color:#fff;
+    }
+
+    .cases-list{display:flex;flex-direction:column;gap:14px}
+
+    .case-row{
+      background:rgba(255,255,255,.06);
+      border:1px solid rgba(255,255,255,.08);
+      border-radius:18px;
+      padding:1.2rem;
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:16px;
+      flex-wrap:wrap;
+      box-shadow:0 18px 40px rgba(180,107,255,.18);
+    }
+
+    .case-left{flex:1;min-width:260px}
+    .case-title{margin:0;font-size:1.1rem;font-weight:900}
+    .case-sub{margin:.2rem 0 0;opacity:.85}
+
+    .case-mid{display:flex;gap:10px;flex-wrap:wrap}
+    .pill{
+      background:rgba(168,85,247,.18);
+      border:1px solid rgba(168,85,247,.30);
+      padding:.4rem .7rem;
+      border-radius:999px;
+      font-weight:800;
+      font-size:.8rem;
+    }
+
+    .case-actions{display:flex;gap:10px;flex-wrap:wrap}
+
+    /* ===== Modal ===== */
+    .modal-overlay{
+      position:fixed;inset:0;
+      background:rgba(20,0,40,.65);
+      display:flex;align-items:center;justify-content:center;
+      z-index:9999;
+    }
+    .modal-box{
+      background:rgba(30,0,60,.95);
+      border-radius:18px;
+      padding:1.4rem;
+      width:min(500px,90%);
+    }
+    .modal-actions{
+      display:flex;justify-content:flex-end;gap:10px;margin-top:1rem
+    }
+
+    /* ===== Ghost ===== */
+    .ghost{
+      position:fixed;inset:0;
+      background:rgba(15,10,30,.75);
+      display:flex;align-items:center;justify-content:center;
+      z-index:99999;
+    }
+    .ghost img{
+      width:150px;
+      animation:float 2.5s ease-in-out infinite;
+    }
+    @keyframes float{
+      50%{transform:translateY(-12px)}
+    }
+  </style>
+</head>
+
+<body>
+
+<div class="sidebar">
+  <h2 class="logo">SISTEMA AURA</h2>
+  <span id="agentNameDisplay" class="agent-display">Agente: -</span>
+
+    <ul>
+      <li><a href="../dashboard.html" class="navlink active"><span class="icon">🏠</span><span class="label">Dashboard</span></a></li>
+      <li><a href="../investigacoes/ver.html" class="navlink"><span class="icon">🕵️</span><span class="label">Investigações</span></a></li>
+    </ul>
+
+    <button id="logoutBtn">Sair</button>
+  </div>
+
+<div class="main-content">
+  <div class="page-container">
+
+    <div class="top-row">
+      <div class="top-left">
+        <button class="btn-soft" onclick="location.href='ver.html'">←</button>
+        <h1>🗃 Investigações Arquivadas</h1>
+      </div>
+    </div>
+
+    <div class="search-wrapper">
+      <input id="searchBar" placeholder="Pesquisar investigação arquivada...">
+    </div>
+
+    <div id="list" class="cases-list"></div>
+
+  </div>
+</div>
+
+<script type="module">
+import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-app.js";
+import {
+  getFirestore, collection, onSnapshot,
+  updateDoc, deleteDoc, doc, query, where
+} from "https://www.gstatic.com/firebasejs/10.13.1/firebase-firestore.js";
+import { firebaseConfig } from "../firebaseConfig.js";
+import { logAction } from "../utils/logger.js";
+
+const app = getApps().length ? getApps()[0] : initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+const list = document.getElementById("list");
+const search = document.getElementById("searchBar");
+let all = [];
+
+function ghost(){
+  const g=document.createElement("div");
+  g.className="ghost";
+  g.innerHTML=`<img src="../fantasma_aura_sem_fundo.png">`;
+  document.body.appendChild(g);
+  return g;
+}
+
+function confirmModal(title,text,okLabel){
+  return new Promise(res=>{
+    const m=document.createElement("div");
+    m.className="modal-overlay";
+    m.innerHTML=`
+      <div class="modal-box">
+        <h3>${title}</h3>
+        <p>${text}</p>
+        <div class="modal-actions">
+          <button class="btn-soft cancel">Cancelar</button>
+          <button class="btn-main ok">${okLabel}</button>
+        </div>
+      </div>`;
+    document.body.appendChild(m);
+
+    m.querySelector(".cancel").onclick=()=>{m.remove();res(false)};
+    m.querySelector(".ok").onclick=()=>{m.remove();res(true)};
+  });
+}
+
+function render(data){
+  list.innerHTML="";
+  if(!data.length){
+    list.innerHTML=`<div class="case-row"><b>Nenhuma investigação arquivada</b></div>`;
+    return;
+  }
+
+  data.forEach(inv=>{
+    const row=document.createElement("div");
+    row.className="case-row";
+
+    row.innerHTML=`
+      <div class="case-left">
+        <h3 class="case-title">${inv.titulo||"Sem título"}</h3>
+        <p class="case-sub"><b>Responsável:</b> ${inv.responsavel||"-"}</p>
+      </div>
+
+      <div class="case-mid">
+        <span class="pill">👥 ${(inv.envolvidos||[]).length}</span>
+        <span class="pill">🚗 ${(inv.veiculos||[]).length}</span>
+        <span class="pill">⚔️ ${(inv.faccoes||[]).length}</span>
+      </div>
+
+      <div class="case-actions">
+        <button class="btn-main restore">♻️ Restaurar</button>
+        <button class="btn-danger delete">🗑 Eliminar</button>
+      </div>
+    `;
+
+    row.querySelector(".restore").onclick=async()=>{
+      const ok=await confirmModal(
+        "Restaurar investigação",
+        "Esta investigação vai voltar para Ativas.",
+        "Restaurar"
+      );
+      if(!ok) return;
+
+      const g=ghost();
+      await updateDoc(doc(db,"investigacoes",inv.id),{ estado:"ativo" });
+      await logAction("restaurou","investigação",inv.titulo||"");
+      g.remove();
+    };
+
+    row.querySelector(".delete").onclick=async()=>{
+      const ok=await confirmModal(
+        "Eliminar definitivamente",
+        "Esta ação é permanente.",
+        "Eliminar"
+      );
+      if(!ok) return;
+
+      const g=ghost();
+      await deleteDoc(doc(db,"investigacoes",inv.id));
+      await logAction("apagou","investigação",inv.titulo||"");
+      g.remove();
+    };
+
+    list.appendChild(row);
+  });
+}
+
+search.oninput=()=>{
+  const q=search.value.toLowerCase();
+  render(all.filter(i=>(i.titulo||"").toLowerCase().includes(q)));
+};
+
+const qInv = query(
+  collection(db,"investigacoes"),
+  where("estado","==","arquivado")
+);
+
+onSnapshot(qInv,snap=>{
+  all = snap.docs.map(d=>({id:d.id,...d.data()}));
+  render(all);
+});
+</script>
+
+<script>
+document.getElementById("agentNameDisplay").textContent =
+  "Agente: " + (localStorage.getItem("selectedAgent") || "Desconhecido");
+
+document.getElementById("logoutBtn").onclick=()=>{
+  ["username","selectedAgent","userRole","userCode","isAdmin"]
+    .forEach(k=>localStorage.removeItem(k));
+  location.href="../select.html";
+};
+</script>
+
+</body>
+</html>

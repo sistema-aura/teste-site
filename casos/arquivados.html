@@ -49,7 +49,6 @@
       cursor:pointer;
     }
 
-    /* 👻 Ghost no card */
     .ghost-card{
       position:absolute;
       inset:0;
@@ -103,12 +102,12 @@ import {
   getDocs, updateDoc, deleteDoc, doc
 } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-firestore.js";
 import { firebaseConfig } from "../firebaseConfig.js";
+import { logAction } from "../utils/logger.js";
 
 const app = getApps().length ? getApps()[0] : initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const grid = document.getElementById("casesGrid");
 
-/* 👻 ghost */
 function showCardGhost(card){
   const g = document.createElement("div");
   g.className = "ghost-card";
@@ -121,13 +120,13 @@ const q = query(collection(db,"cases"), where("archived","==",true));
 const snap = await getDocs(q);
 
 snap.forEach(d=>{
-  const c={id:d.id,...d.data()};
+  const c = { id: d.id, ...d.data() };
 
-  const card=document.createElement("div");
-  card.className="case-card";
-  card.innerHTML=`
-    <h3>${c.title||"Sem título"}</h3>
-    <p class="meta"><b>Responsável:</b> ${c.responsible||"-"}</p>
+  const card = document.createElement("div");
+  card.className = "case-card";
+  card.innerHTML = `
+    <h3>${c.title || "Sem título"}</h3>
+    <p class="meta"><b>Responsável:</b> ${c.responsible || "-"}</p>
 
     <div class="actions">
       <button class="btn-soft reopenBtn">🗃 Reabrir</button>
@@ -135,39 +134,42 @@ snap.forEach(d=>{
     </div>
   `;
 
-  card.querySelector(".reopenBtn").onclick=async()=>{
+  // 🔁 REABRIR
+  card.querySelector(".reopenBtn").onclick = async () => {
     const ghost = showCardGhost(card);
-    try{
-      await updateDoc(doc(db,"cases",c.id),{archived:false});
+    try {
+      await updateDoc(doc(db,"cases",c.id), { archived:false });
+      await logAction("editou", "caso", c.title);
       card.remove();
-    }finally{
+    } finally {
       ghost.remove();
-
-await logAction("editou", "caso", title.value.trim());
     }
   };
 
-  card.querySelector(".deleteBtn").onclick=async()=>{
-    if(!confirm("Eliminar definitivamente este caso?")) return;
+  // 🗑 APAGAR
+  card.querySelector(".deleteBtn").onclick = async () => {
+    if (!confirm("Eliminar definitivamente este caso?")) return;
+
     const ghost = showCardGhost(card);
-    try{
+    try {
       await deleteDoc(doc(db,"cases",c.id));
+      await logAction("apagou", "caso", c.title);
       card.remove();
-    }finally{
+    } finally {
       ghost.remove();
-      await logAction("apagou", "caso", title.value.trim());
     }
   };
 
   grid.appendChild(card);
 });
+
 </script>
 
 <script>
-logoutBtn.onclick=()=>{
+logoutBtn.onclick = () => {
   ["username","selectedAgent","userRole","userCode","isAdmin"]
-    .forEach(k=>localStorage.removeItem(k));
-  location.href="../select.html";
+    .forEach(k => localStorage.removeItem(k));
+  location.href = "../select.html";
 };
 </script>
 

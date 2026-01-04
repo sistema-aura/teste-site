@@ -1,335 +1,313 @@
 <!DOCTYPE html>
 <html lang="pt">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Veículos — Sistema AURA 💜</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Veículos — Sistema AURA</title>
 
-  <link rel="icon" href="../Aurinha.png" />
-  <link rel="stylesheet" href="../style.css" />
+<link rel="icon" href="../Aurinha.png">
+<link rel="stylesheet" href="../style.css">
 
-  <style>
-    .page-container { padding: 2rem; }
-    .topbar { display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; margin-bottom:1.4rem; gap:8px; }
-    .actions { display:flex; gap:8px; flex-wrap:wrap; }
+<style>
+a{text-decoration:none!important}
 
-    .btn {
-      background: linear-gradient(90deg,#9b4dff,#b86bff);
-      border:none; border-radius:10px; color:#fff; font-weight:600;
-      padding:8px 14px; cursor:pointer; transition:.2s;
-      box-shadow:0 0 10px rgba(180,107,255,.25);
-    }
-    .btn:hover { transform:translateY(-1px); box-shadow:0 10px 22px rgba(180,107,255,.35); }
-    .btn-soft { background:rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.08); }
-    .btn-danger { background: linear-gradient(90deg,#ff4d6d,#ff7c6b); }
+/* TOP */
+.top-row{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:12px;
+  margin-bottom:1rem;
+  flex-wrap:wrap;
+}
+.top-left{display:flex;align-items:center;gap:10px}
+.top-actions{display:flex;gap:10px;flex-wrap:wrap}
 
-    .searchbar { margin:.5rem 0 1rem; display:flex; gap:8px; }
-    .searchbar input {
-      flex:1; padding:.8rem 1rem; border-radius:12px; border:none;
-      background:rgba(255,255,255,.08); color:#fff; outline:none;
-      box-shadow: 0 0 10px rgba(180,107,255,.25);
-    }
+/* BOTÕES */
+.btn-soft-aura{
+  background:rgba(180,107,255,.18);
+  border:1px solid rgba(180,107,255,.35);
+  border-radius:14px;
+  padding:.6rem 1.2rem;
+  font-weight:800;
+  color:#fff;
+  cursor:pointer;
+  transition:.25s;
+}
+.btn-soft-aura:hover{background:rgba(180,107,255,.28);transform:translateY(-2px)}
 
-    .grid { display:grid; grid-template-columns: repeat(auto-fill, minmax(300px,1fr)); gap:16px; }
-    .card {
-      background: rgba(255,255,255,.06);
-      border:1px solid rgba(255,255,255,.08);
-      border-radius:16px; padding:14px;
-      box-shadow:0 8px 18px rgba(180,107,255,.15);
-      transition:.2s;
-    }
-    .card:hover { transform:translateY(-3px); }
+.btn-main-aura{
+  background:linear-gradient(135deg,#a855f7,#7c3aed);
+  border:none;
+  border-radius:14px;
+  padding:.65rem 1.4rem;
+  font-weight:900;
+  color:#fff;
+  cursor:pointer;
+  box-shadow:0 12px 30px rgba(168,85,247,.35);
+  transition:.25s;
+}
+.btn-main-aura:hover{transform:translateY(-2px);box-shadow:0 18px 40px rgba(168,85,247,.45)}
 
-    .thumb {
-      width:80px; height:80px; border-radius:10px; object-fit:cover;
-      display:block; margin:2px auto 10px;
-      box-shadow:0 0 12px rgba(180,107,255,.35);
-    }
-    .thumb-file {
-      width:80px; height:80px; border-radius:10px; display:flex; align-items:center; justify-content:center;
-      margin:2px auto 10px; background:rgba(255,255,255,.08); font-weight:700;
-      box-shadow:0 0 12px rgba(180,107,255,.35);
-    }
-    .file-name { text-align:center; font-size:.85rem; opacity:.9; margin-top:-6px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.btn-danger-aura{
+  background:linear-gradient(135deg,#ff4d6d,#ff7c6b);
+  border:none;
+  border-radius:14px;
+  padding:.6rem 1.2rem;
+  font-weight:900;
+  color:#fff;
+  cursor:pointer;
+  transition:.25s;
+}
+.btn-danger-aura:hover{transform:translateY(-2px);box-shadow:0 18px 40px rgba(255,77,109,.35)}
 
-    .card h3 { margin:.35rem 0 .2rem; text-align:center; }
-    .meta { font-size:.95rem; color:#ddd; margin:2px 0; text-align:center; }
-    .meta b{ color:#fff; }
-    .buttons { display:flex; gap:8px; margin-top:.8rem; flex-wrap:wrap; justify-content:center; }
+/* SEARCH */
+.search-wrapper{
+  position:relative;
+  margin:.3rem 0 1.2rem;
+}
+.search-wrapper input{
+  width:100%;
+  padding:.85rem 1rem .85rem 2.8rem;
+  border-radius:14px;
+  background:rgba(0,0,0,.35);
+  border:1px solid rgba(255,255,255,.12);
+  color:#fff;
+}
+.search-wrapper span{
+  position:absolute;
+  left:1rem;
+  top:50%;
+  transform:translateY(-50%);
+  opacity:.75;
+}
 
-    .muted{opacity:.8;}
+/* GRID */
+.grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(320px,1fr));
+  gap:16px;
+}
 
-    /* Toast */
-    .aura-toast{
-      position:fixed; right:16px; bottom:16px; z-index:1200; display:flex; gap:10px; align-items:center;
-      background:rgba(20,0,40,.95); border:1px solid rgba(255,255,255,.08);
-      padding:.7rem 1rem; border-radius:12px; color:#fff; box-shadow:0 10px 24px rgba(180,107,255,.35);
-      animation:fadeIn .15s ease;
-    }
-    .aura-toast.success{ border-color:rgba(140,255,199,.35); }
-    .aura-toast.error{ border-color:rgba(255,124,107,.35); }
-    @keyframes fadeIn{from{opacity:0}to{opacity:1}}
+/* CARD */
+.card{
+  background:rgba(255,255,255,.06);
+  border:1px solid rgba(255,255,255,.08);
+  border-radius:18px;
+  padding:1.2rem;
+  box-shadow:0 18px 40px rgba(180,107,255,.18);
+  backdrop-filter:blur(12px);
+  transition:.25s;
+}
+.card:hover{transform:translateY(-2px);box-shadow:0 24px 52px rgba(180,107,255,.26)}
 
-    /* Modal */
-    .aura-modal-wrap{ position:fixed; inset:0; background:rgba(0,0,0,.55); display:flex; align-items:center; justify-content:center; padding:20px; z-index:1400; animation:fadeIn .15s ease;}
-    .aura-modal{ width:min(560px,95vw); background:rgba(20,0,40,.92); border:1px solid rgba(255,255,255,.08); border-radius:16px; padding:18px; color:#fff; box-shadow:0 18px 40px rgba(180,107,255,.35);}
-    .aura-modal h3{ margin:0 0 6px; }
-    .aura-modal p{ margin:.25rem 0 .8rem; opacity:.9;}
-    .aura-modal .row{ display:flex; gap:10px; justify-content:flex-end;}
-    .aura-btn{ background:rgba(255,255,255,.08); color:#fff; border:1px solid rgba(255,255,255,.08); padding:.6rem .9rem; border-radius:10px; cursor:pointer; font-weight:600;}
-    .aura-btn.primary{ background: linear-gradient(135deg,#b46bff,#9f4dff); border:none;}
-    .aura-btn.danger{ background: linear-gradient(135deg,#ff4d6d,#ff7c6b); border:none;}
-  </style>
+.thumb{
+  width:100%;
+  height:160px;
+  object-fit:cover;
+  border-radius:14px;
+  margin-bottom:.6rem;
+  box-shadow:0 0 18px rgba(180,107,255,.35);
+}
+
+.card h3{margin:.2rem 0;font-weight:900}
+.meta{font-size:.9rem;opacity:.9;margin:.15rem 0}
+.meta b{color:#fff}
+
+.actions{
+  display:flex;
+  gap:10px;
+  margin-top:.8rem;
+  flex-wrap:wrap;
+  justify-content:flex-end;
+}
+
+/* MODAL */
+.modal-overlay{
+  position:fixed;
+  inset:0;
+  background:rgba(20,0,40,.6);
+  backdrop-filter:blur(6px);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  z-index:9999;
+}
+.modal-box{
+  background:rgba(30,0,60,.95);
+  border-radius:18px;
+  padding:1.4rem;
+  width:min(520px,95%);
+  box-shadow:0 20px 55px rgba(180,107,255,.35);
+}
+
+/* GHOST */
+.ghost-global{
+  position:fixed;
+  inset:0;
+  background:rgba(15,10,30,.75);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  z-index:99999;
+}
+.ghost-global img{
+  width:150px;
+  animation:float 2.5s ease-in-out infinite;
+}
+@keyframes float{
+  50%{transform:translateY(-12px)}
+}
+</style>
 </head>
 
 <body>
-  <!-- SIDEBAR -->
-  <div class="sidebar">
-    <h2 class="logo">SISTEMA AURA</h2>
-    <ul>
-      <li><a href="../dashboard.html" class="navlink active"><span class="icon">🏠</span><span class="label">Dashboard</span></a></li>
-      <li><a href="../pesquisa/ver.html" class="navlink"><span class="icon">🔍</span><span class="label">Pesquisa Geral</span></a></li>
-      <li><a href="../perfis/ver.html" class="navlink"><span class="icon">👑</span><span class="label">Perfil da Aura</span></a></li>
-      <li><a href="../people/ver.html" class="navlink"><span class="icon">🧍</span><span class="label">Pessoas</span></a></li>
-      <li><a href="../casos/ver.html" class="navlink"><span class="icon">📁</span><span class="label">Casos</span></a></li>
-      <li><a href="../investigacoes/ver.html" class="navlink"><span class="icon">🕵️</span><span class="label">Investigações</span></a></li>
-      <li><a href="../veiculos/ver.html" class="navlink"><span class="icon">🏎️</span><span class="label">Veículos</span></a></li>
-      <li><a href="../facc/ver.html" class="navlink"><span class="icon">⚔️</span><span class="label">Facções</span></a></li>
-      <li><a href="../perimetro/ver.html" class="navlink"><span class="icon">📍</span><span class="label">Perímetro de Ações</span></a></li>
-      <li><a href="../reunioes/ver.html" class="navlink"><span class="icon">🗓️</span><span class="label">Reuniões</span></a></li>
 
-      <!-- AQUI: removi o active do Regras CDA -->
-      <li><a href="../regras/ver.html" class="navlink"><span class="icon">📚</span><span class="label">Regras CDA</span></a></li>
-    </ul>
+<!-- SIDEBAR -->
+<div class="sidebar">
+  <h2 class="logo">SISTEMA AURA</h2>
+  <span id="agentNameDisplay" class="agent-display"></span>
 
-    <button id="logoutBtn">Sair</button>
-  </div>
+  <ul>
+    <li><a href="../dashboard.html" class="navlink"><span class="icon">🏠</span><span class="label">Dashboard</span></a></li>
+    <li><a href="../pesquisa/ver.html" class="navlink"><span class="icon">🔍</span><span class="label">Pesquisa Geral</span></a></li>
+    <li><a href="../perfis/ver.html" class="navlink"><span class="icon">👑</span><span class="label">Perfil da Aura</span></a></li>
+    <li><a href="../people/ver.html" class="navlink"><span class="icon">🧍</span><span class="label">Pessoas</span></a></li>
+    <li><a href="../casos/ver.html" class="navlink"><span class="icon">📁</span><span class="label">Casos</span></a></li>
+    <li><a href="../investigacoes/ver.html" class="navlink"><span class="icon">🕵️</span><span class="label">Investigações</span></a></li>
+    <li><a href="../veiculos/ver.html" class="navlink active"><span class="icon">🏎️</span><span class="label">Veículos</span></a></li>
+    <li><a href="../regras/ver.html" class="navlink"><span class="icon">📚</span><span class="label">Regras CDA</span></a></li>
+  </ul>
 
-  <!-- CONTEÚDO -->
-  <div class="main-content">
-    <div class="page-container">
-      <div class="topbar">
-        <h1>Veículos</h1>
-        <div class="actions">
-          <!-- Arquivados removido -->
-          <button id="newBtn" class="btn only-editor">➕ Novo Veículo</button>
-        </div>
+  <button id="logoutBtn">Sair</button>
+</div>
+
+<!-- CONTEÚDO -->
+<div class="main-content">
+  <div class="page-container">
+
+    <div class="top-row">
+      <div class="top-left">
+        <button class="btn-soft-aura" onclick="history.back()">←</button>
+        <h1>🏎️ Veículos</h1>
       </div>
-
-      <div class="searchbar">
-        <input id="searchBar" placeholder="Pesquisar por modelo, placa ou dono..." />
+      <div class="top-actions">
+        <a id="btnNovo" href="criar.html" class="btn-main-aura">➕ Novo Veículo</a>
       </div>
-
-      <div id="vehGrid" class="grid"></div>
     </div>
+
+    <div class="search-wrapper">
+      <span>🔍</span>
+      <input id="searchBar" placeholder="Pesquisar por modelo, placa ou dono...">
+    </div>
+
+    <div id="grid" class="grid"></div>
+
   </div>
+</div>
 
-  <!-- FIREBASE -->
-  <script type="module">
-    import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-app.js";
-    import {
-      getFirestore, collection, getDocs, deleteDoc, doc, query, where
-    } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-firestore.js";
-    import { firebaseConfig } from "../firebaseConfig.js";
-    import { logAction } from "../utils/logger.js";
+<script type="module">
+import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-app.js";
+import {
+  getFirestore, collection, query, where, onSnapshot, deleteDoc, doc
+} from "https://www.gstatic.com/firebasejs/10.13.1/firebase-firestore.js";
+import { firebaseConfig } from "../firebaseConfig.js";
+import { logAction } from "../utils/logger.js";
 
+const app = getApps().length ? getApps()[0] : initializeApp(firebaseConfig);
+const db = getFirestore(app);
 
-    const app = getApps().length ? getApps()[0] : initializeApp(firebaseConfig);
-    const db = getFirestore(app);
+const role = (localStorage.getItem("userRole")||"").toLowerCase();
+const isAdmin = localStorage.getItem("isAdmin")==="true";
+const canEdit = isAdmin || role==="investigador";
 
-    const grid   = document.getElementById("vehGrid");
-    const search = document.getElementById("searchBar");
+if(!canEdit) document.getElementById("btnNovo")?.remove();
 
-    // Permissões
-    const isAdmin = localStorage.getItem("isAdmin")==="true";
-    const roleStr = (localStorage.getItem("userRole")||"").toLowerCase();
-    const canEdit = isAdmin || roleStr==="investigador";
+const grid = document.getElementById("grid");
+const search = document.getElementById("searchBar");
+let all = [];
 
-    // Navegação
-    document.getElementById("newBtn").onclick = ()=> window.location.href="criar.html";
+function ghost(){
+  const g=document.createElement("div");
+  g.className="ghost-global";
+  g.innerHTML=`<img src="../fantasma_aura_sem_fundo.png">`;
+  document.body.appendChild(g);
+  return g;
+}
 
-    // Toast
-    function toast(msg,type="success"){
-      const t=document.createElement("div");
-      t.className=`aura-toast ${type}`;
-      t.innerHTML=`<span>${type==="success"?"✅":"⚠️"}</span><span>${msg}</span>`;
-      document.body.appendChild(t);
-      setTimeout(()=>{ t.style.opacity="0"; setTimeout(()=>t.remove(),260); }, 1900);
-    }
+function render(list){
+  grid.innerHTML="";
+  list.forEach(v=>{
+    const card=document.createElement("div");
+    card.className="card";
 
-    // Modal confirmar
-    function confirmModal({title="Confirmar", message="Tens a certeza?", okText="Confirmar", variant="primary"}){
-      return new Promise(resolve=>{
-        const wrap=document.createElement("div");
-        wrap.className="aura-modal-wrap";
-        wrap.innerHTML=`
-          <div class="aura-modal">
-            <h3>${title}</h3>
-            <p>${message}</p>
-            <div class="row">
-              <button class="aura-btn">Cancelar</button>
-              <button class="aura-btn ${variant==='danger'?'danger':'primary'}">${okText}</button>
-            </div>
-          </div>`;
-        document.body.appendChild(wrap);
-        const [cancelBtn, okBtn] = wrap.querySelectorAll("button");
-        const close = (v)=>{ wrap.remove(); resolve(v); };
-        cancelBtn.onclick = ()=> close(false);
-        okBtn.onclick     = ()=> close(true);
-        wrap.addEventListener("click",(e)=>{ if(e.target===wrap) close(false); });
-      });
-    }
+    card.innerHTML=`
+      <img class="thumb" src="${v.photoURL||"../Aurinha.png"}">
+      <h3>${v.modelo||"Sem modelo"}</h3>
+      <div class="meta"><b>Placa:</b> ${v.placa||"-"}</div>
+      <div class="meta"><b>Dono:</b> ${v.donoNome||"-"}</div>
+      <div class="meta"><b>Tipo:</b> ${v.tipo||"-"}</div>
 
-    function isImageLike(url, type){
-      if(type && type.startsWith("image/")) return true;
-      return /\.(png|jpe?g|gif|webp|bmp|svg)$/i.test(url||"");
-    }
+      <div class="actions">
+        <button class="btn-soft-aura view">👁 Ver</button>
+        ${canEdit?`<a class="btn-soft-aura" href="editar.html?id=${v.id}">✏️ Editar</a>`:""}
+        ${canEdit?`<button class="btn-danger-aura del">🗑</button>`:""}
+      </div>
+    `;
 
-    let allVehicles = [];
+    card.querySelector(".view").onclick=()=>{
+      const m=document.createElement("div");
+      m.className="modal-overlay";
+      m.innerHTML=`
+        <div class="modal-box">
+          <h3>${v.modelo}</h3>
+          <p><b>Placa:</b> ${v.placa}</p>
+          <p><b>Dono:</b> ${v.donoNome||"-"}</p>
+          <p><b>Descrição:</b><br>${(v.descricao||"").replaceAll("\n","<br>")}</p>
+          <div style="text-align:right;margin-top:10px">
+            <button class="btn-soft-aura close">Fechar</button>
+          </div>
+        </div>`;
+      document.body.appendChild(m);
+      m.querySelector(".close").onclick=()=>m.remove();
+      m.onclick=e=>{if(e.target===m)m.remove();}
+    };
 
-    async function loadVehicles(){
-      try{
-        const q = query(collection(db,"veiculos"), where("estado","==","ativo"));
-        const snap = await getDocs(q);
-        allVehicles = snap.docs.map(d=>({ id:d.id, ...d.data() }));
-      }catch(e){
-        console.warn("Query com where falhou, fallback:", e);
-        const snap = await getDocs(collection(db,"veiculos"));
-        allVehicles = snap.docs
-          .map(d=>({ id:d.id, ...d.data() }))
-          .filter(v => (v.estado||"ativo")==="ativo");
-      }
-
-      // ordenar por createdAt (se existir)
-      allVehicles.sort((a,b)=>{
-        const ta = (a.createdAt?.seconds ?? (a.createdAt?.toMillis?.() ?? 0));
-        const tb = (b.createdAt?.seconds ?? (b.createdAt?.toMillis?.() ?? 0));
-        return tb - ta;
-      });
-
-      render(allVehicles);
-    }
-
-    function makeCard(v){
-      const isImg = isImageLike(v.photoURL, v.fileType);
-      const thumb = v.photoURL
-        ? (isImg ? `<img class="thumb" src="${v.photoURL}" alt="veículo">`
-                 : `<div class="thumb-file">📄</div><div class="file-name" title="${v.fileName||"anexo"}">${v.fileName||"anexo"}</div>`)
-        : `<img class="thumb" src="../Aurinha.png" alt="veículo">`;
-
-      const placa = v.placa || "-";
-      const dono  = v.donoNome || "-";
-
-      const el = document.createElement("div");
-      el.className = "card";
-      el.innerHTML = `
-        ${thumb}
-        <h3>${v.modelo || "Sem modelo"}</h3>
-        <div class="meta"><b>Placa:</b> ${placa}</div>
-        <div class="meta"><b>Dono:</b> ${dono}</div>
-        <div class="meta"><b>Tipo:</b> ${v.tipo || "-"}</div>
-        ${v.cor ? `<div class="meta"><b>Cor:</b> ${v.cor}</div>` : ""}
-        <div class="buttons">
-          <button class="btn btn-soft viewBtn">👁 Ver</button>
-          ${canEdit ? `
-            <button class="btn btn-soft editBtn">🖊 Editar</button>
-            <button class="btn btn-danger delBtn">🗑 Eliminar</button>
-          ` : ""}
-        </div>
-      `;
-
-      // Ver
-      el.querySelector(".viewBtn").onclick = ()=>{
-        const wrap = document.createElement("div");
-        wrap.className="aura-modal-wrap";
-
-        const fileBlock = v.photoURL ? (isImg
-          ? `<p><img src="${v.photoURL}" alt="veículo" style="max-width:100%;border-radius:12px;box-shadow:0 0 12px rgba(180,107,255,.35);" /></p>`
-          : `<p>📄 ${v.fileName||"anexo"} — <a href="${v.photoURL}" target="_blank" style="color:#bfa7ff;text-decoration:underline;">Abrir</a></p>`
-        ) : "";
-
-        wrap.innerHTML = `
-          <div class="aura-modal">
-            <h3>${v.modelo || "Sem modelo"}</h3>
-            <p><b>Placa:</b> ${placa}</p>
-            <p><b>Dono:</b> ${dono}</p>
-            <p><b>Tipo:</b> ${v.tipo || "-"}</p>
-            ${v.cor ? `<p><b>Cor:</b> ${v.cor}</p>` : ""}
-            <p><b>Descrição:</b><br>${v.descricao || "Sem descrição."}</p>
-            ${fileBlock}
-            <div class="row"><button class="aura-btn primary">Fechar</button></div>
-          </div>`;
-        wrap.querySelector("button").onclick = ()=> wrap.remove();
-        wrap.addEventListener("click",(e)=>{ if(e.target===wrap) wrap.remove(); });
-        document.body.appendChild(wrap);
-      };
-
-      // Editar
-      el.querySelector(".editBtn")?.addEventListener("click", ()=> {
-        window.location.href = `editar.html?id=${v.id}`;
-      });
-
-      // Eliminar
-      el.querySelector(".delBtn")?.addEventListener("click", async ()=>{
-        const label = v.modelo || v.placa || v.id;
-        const ok = await confirmModal({
-          title:"Eliminar veículo",
-          message:`Esta ação é permanente. Eliminar <b>${label}</b>?`,
-          okText:"Eliminar",
-          variant:"danger"
-        });
-        if(!ok) return;
-        try{
-          await deleteDoc(doc(db,"veiculos", v.id));
-          el.remove();
-          toast("Veículo eliminado!");
-        }catch(e){ console.error(e); toast("Erro ao eliminar: " + e.message, "error"); }
-      });
-
-      return el;
-    }
-
-    function render(list){
-      grid.innerHTML = "";
-      if(!list.length){
-        grid.innerHTML = "<p class='muted'>Nenhum veículo registado.</p>";
-        return;
-      }
-      list.forEach(v => grid.appendChild(makeCard(v)));
-    }
-
-    search.addEventListener("input", (e)=>{
-      const t = (e.target.value || "").toLowerCase().trim();
-      const filtered = allVehicles.filter(v =>
-        (v.modelo    || "").toLowerCase().includes(t) ||
-        (v.placa     || "").toLowerCase().includes(t) ||
-        (v.donoNome  || "").toLowerCase().includes(t)
-      );
-      render(filtered);
+    card.querySelector(".del")?.addEventListener("click",async()=>{
+      if(!confirm("Eliminar veículo?")) return;
+      const g=ghost();
+      await deleteDoc(doc(db,"veiculos",v.id));
+      await logAction("apagou","veículo",`${v.modelo} (${v.placa})`);
+      g.remove();
     });
 
-    loadVehicles();
-  </script>
+    grid.appendChild(card);
+  });
+}
 
-  <!-- LOGOUT + PERMISSÕES VISUAIS -->
-  <script>
-    (function(){
-      const logoutBtn = document.getElementById("logoutBtn");
-      if (logoutBtn) {
-        logoutBtn.addEventListener("click", () => {
-          ["username","selectedAgent","userRole","userCode","isAdmin"].forEach(k => localStorage.removeItem(k));
-          window.location.href = "../select.html";
-        });
-      }
+search.oninput=()=>{
+  const q=search.value.toLowerCase();
+  render(all.filter(v=>
+    (v.modelo||"").toLowerCase().includes(q) ||
+    (v.placa||"").toLowerCase().includes(q) ||
+    (v.donoNome||"").toLowerCase().includes(q)
+  ));
+};
 
-      const isAdmin = localStorage.getItem("isAdmin")==="true";
-      const role = (localStorage.getItem("userRole")||"").toLowerCase();
-      const canEdit = isAdmin || role==="investigador";
+const q=query(collection(db,"veiculos"),where("estado","==","ativo"));
+onSnapshot(q,snap=>{
+  all=snap.docs.map(d=>({id:d.id,...d.data()}));
+  render(all);
+});
 
-      if (!canEdit) {
-        document.querySelectorAll(".only-editor").forEach(el => el.style.display = "none");
-      }
-    })();
-  </script>
+document.getElementById("agentNameDisplay").innerText =
+  "Agente: "+(localStorage.getItem("selectedAgent")||"-");
+
+document.getElementById("logoutBtn").onclick=()=>{
+  ["username","selectedAgent","userRole","userCode","isAdmin"].forEach(k=>localStorage.removeItem(k));
+  location.href="../select.html";
+};
+</script>
+
 </body>
 </html>

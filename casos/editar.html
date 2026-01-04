@@ -307,7 +307,6 @@ import {
 import { firebaseConfig } from "../firebaseConfig.js";
 import { logAction } from "../utils/logger.js";
 
-
 const app = getApps().length ? getApps()[0] : initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
@@ -347,8 +346,8 @@ function setupSearch(inputId, autoId, chipsId, col, key, labelFn, chipFn){
     items=s.docs.map(d=>({id:d.id,...d.data()}));
 
     // preload chips
-    selected[key].forEach(id=>{
-      const item=items.find(i=>i.id===id);
+    selected[key].forEach(existingId=>{
+      const item=items.find(i=>i.id===existingId);
       if(item) addChip(item);
     });
   });
@@ -398,36 +397,74 @@ setupSearch("vehicleSearch","vehicleAuto","vehicleChips","veiculos","vehicles",
 setupSearch("factionSearch","factionAuto","factionChips","facc","factions",
   f=>`${f.nome}${f.sigla?" ("+f.sigla+")":""}`,f=>f.nome);
 
+/* ✅ SALVAR (corrigido: log antes do redirect + remove ghost) */
 editForm.onsubmit = async e=>{
   e.preventDefault();
-  const g=showGhost();
-  await updateDoc(doc(db,"cases",id),{
-    title:title.value.trim(),
-    responsible:responsible.value.trim(),
-    description:description.value.trim(),
-    people:selected.people,
-    vehicles:selected.vehicles,
-    factions:selected.factions
-  });
-  location.href="ver.html";
+  saveBtn.disabled = true;
+  const ghost = showGhost();
 
-await logAction("editou", "caso", title.value.trim());
+  try{
+    const newTitle = title.value.trim();
+
+    await updateDoc(doc(db,"cases",id),{
+      title: newTitle,
+      responsible: responsible.value.trim(),
+      description: description.value.trim(),
+      people: selected.people,
+      vehicles: selected.vehicles,
+      factions: selected.factions
+    });
+
+    await logAction("editou", "caso", newTitle);
+
+    location.href="ver.html";
+  }catch(err){
+    console.error("Erro ao editar caso:", err);
+    alert("Erro ao guardar alterações.");
+    saveBtn.disabled = false;
+  }finally{
+    ghost.remove();
+  }
 };
 
+/* ✅ ARQUIVAR (corrigido: log antes do redirect + remove ghost) */
 archiveBtn.onclick = async ()=>{
-  const g=showGhost();
-  await updateDoc(doc(db,"cases",id),{archived:true});
-  location.href="ver.html";
+  if(!confirm("Arquivar este caso?")) return;
 
-await logAction("editou", "caso", title.value.trim());
+  const ghost = showGhost();
+  try{
+    const newTitle = title.value.trim();
+    await updateDoc(doc(db,"cases",id),{ archived:true });
+
+    await logAction("editou", "caso", newTitle);
+
+    location.href="ver.html";
+  }catch(err){
+    console.error("Erro ao arquivar:", err);
+    alert("Erro ao arquivar.");
+  }finally{
+    ghost.remove();
+  }
 };
 
+/* ✅ APAGAR (corrigido: log antes do redirect + remove ghost) */
 deleteBtn.onclick = async ()=>{
   if(!confirm("Eliminar definitivamente?")) return;
-  const g=showGhost();
-  await deleteDoc(doc(db,"cases",id));
-  location.href="ver.html";
-  await logAction("apagou", "caso", title.value.trim());
+
+  const ghost = showGhost();
+  try{
+    const currentTitle = title.value.trim();
+    await deleteDoc(doc(db,"cases",id));
+
+    await logAction("apagou", "caso", currentTitle);
+
+    location.href="ver.html";
+  }catch(err){
+    console.error("Erro ao eliminar:", err);
+    alert("Erro ao eliminar.");
+  }finally{
+    ghost.remove();
+  }
 };
 </script>
 

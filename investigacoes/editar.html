@@ -473,7 +473,7 @@ editForm.onsubmit=async e=>{
     fotos:urls,
     updatedAt:serverTimestamp()
   });
-     await logAction("editou", "caso", title.value.trim());
+  await logAction("editou", "investigação", titulo.value.trim());
   location.href="ver.html";
 };
 
@@ -481,8 +481,8 @@ editForm.onsubmit=async e=>{
 archiveBtn.onclick=async()=>{
   const ghost=showGhost();
   await updateDoc(doc(db,"investigacoes",id),{estado:"arquivado"});
-  location.href="ver.html";
-       await logAction("editou", "caso", title.value.trim());
+  await logAction("arquivou", "investigação", titulo.value.trim());
+  ocation.href="ver.html";
 };
 
 /* eliminar */
@@ -490,8 +490,8 @@ deleteBtn.onclick=async()=>{
   if(!confirm("Eliminar definitivamente?")) return;
   const ghost=showGhost();
   await deleteDoc(doc(db,"investigacoes",id));
+  await logAction("apagou", "investigação", titulo.value.trim());
   location.href="ver.html";
-  await logAction("apagou", "caso", title.value.trim());
 };
 </script>
 

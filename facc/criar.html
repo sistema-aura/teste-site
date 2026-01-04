@@ -114,7 +114,7 @@ a{ text-decoration:none; }
       <li><a href="../casos/ver.html" class="navlink"><span class="icon">📁</span><span class="label">Casos</span></a></li>
       <li><a href="../investigacoes/ver.html" class="navlink"><span class="icon">🕵️</span><span class="label">Investigações</span></a></li>
       <li><a href="../veiculos/ver.html" class="navlink"><span class="icon">🏎️</span><span class="label">Veículos</span></a></li>
-      <li><a href="facc/ver.html" class="navlink"><span class="icon">⚔️</span><span class="label">Facções</span></a></li>
+      <li><a href="../facc/ver.html" class="navlink"><span class="icon">⚔️</span><span class="label">Facções</span></a></li>
       <li><a href="../perimetro/ver.html" class="navlink"><span class="icon">📍</span><span class="label">Perímetro de Ações</span></a></li>
       <li><a href="../reunioes/ver.html" class="navlink"><span class="icon">🗓️</span><span class="label">Reuniões</span></a></li>
 
@@ -216,13 +216,13 @@ a{ text-decoration:none; }
 </div>
 </div>
 
+<!-- (mantém tudo igual até ao <script type="module">) -->
 <script type="module">
 import { initializeApp,getApps } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-app.js";
 import { getFirestore,collection,getDocs,addDoc } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-firestore.js";
 import { getStorage,ref,uploadBytes,getDownloadURL } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-storage.js";
 import { firebaseConfig } from "../firebaseConfig.js";
 import { logAction } from "../utils/logger.js";
-
 
 const app=getApps().length?getApps()[0]:initializeApp(firebaseConfig);
 const db=getFirestore(app);
@@ -238,7 +238,7 @@ function hideGhost(){ ghostOverlay.style.display="none"; }
 colorPreview.style.background = faccColor.value;
 faccColor.oninput = ()=> colorPreview.style.background = faccColor.value;
 
-/* FOTO FACÇÃO preview */
+/* FOTO FACÇÃO */
 let faccPhotoFile=null;
 faccPhoto.onchange=()=>{
   const f=faccPhoto.files[0];
@@ -256,8 +256,7 @@ const PEOPLE=(await getDocs(collection(db,"people"))).docs.map(d=>({id:d.id,labe
 
 let o1=null,o2=null,o3=null,membros=[];
 
-/* AUTOCOMPLETE (com opção de limpar input ao escolher) */
-let globalACBound=false;
+/* AUTOCOMPLETE */
 function autocomplete(input,data,onPick,{blocked=[],clearOnPick=false}={}){
   const box=input.nextElementSibling;
 
@@ -266,8 +265,7 @@ function autocomplete(input,data,onPick,{blocked=[],clearOnPick=false}={}){
     box.innerHTML="";
     if(!q){ box.style.display="none"; return; }
 
-    data
-      .filter(p=>p.label.toLowerCase().includes(q) && !blocked.includes(p.id))
+    data.filter(p=>p.label.toLowerCase().includes(q) && !blocked.includes(p.id))
       .slice(0,8)
       .forEach(p=>{
         const d=document.createElement("div");
@@ -277,41 +275,27 @@ function autocomplete(input,data,onPick,{blocked=[],clearOnPick=false}={}){
           onPick(p);
           input.value = clearOnPick ? "" : p.label;
           box.style.display="none";
-          input.focus();
         };
         box.appendChild(d);
       });
 
     box.style.display = box.children.length ? "block" : "none";
   });
-
-  if(!globalACBound){
-    globalACBound=true;
-    document.addEventListener("click",(e)=>{
-      document.querySelectorAll(".autocomplete-list").forEach(el=>{
-        const inp=el.previousElementSibling;
-        if(!inp) return;
-        if(el.contains(e.target) || inp.contains(e.target)) return;
-        el.style.display="none";
-      });
-    });
-  }
 }
 
 /* HIERARQUIA */
 function pick(role,p){
   if([o1,o2,o3].includes(p.id)) return;
-
   if(role==="o1"){ o1=p.id; o1Input.value=p.label; }
   if(role==="o2"){ o2=p.id; o2Input.value=p.label; }
   if(role==="o3"){ o3=p.id; o3Input.value=p.label; }
 }
 
-autocomplete(o1Input,PEOPLE,p=>pick("o1",p),{blocked:[o2,o3],clearOnPick:false});
-autocomplete(o2Input,PEOPLE,p=>pick("o2",p),{blocked:[o1,o3],clearOnPick:false});
-autocomplete(o3Input,PEOPLE,p=>pick("o3",p),{blocked:[o1,o2],clearOnPick:false});
+autocomplete(o1Input,PEOPLE,p=>pick("o1",p),{blocked:[o2,o3]});
+autocomplete(o2Input,PEOPLE,p=>pick("o2",p),{blocked:[o1,o3]});
+autocomplete(o3Input,PEOPLE,p=>pick("o3",p),{blocked:[o1,o2]});
 
-/* MEMBROS (aqui LIMPA o input ao escolher) */
+/* MEMBROS */
 function addMemberChip(p){
   const c=document.createElement("span");
   c.className="chip";
@@ -327,51 +311,31 @@ autocomplete(membrosInput,PEOPLE,(p)=>{
   if([o1,o2,o3].includes(p.id) || membros.includes(p.id)) return;
   membros.push(p.id);
   addMemberChip(p);
-},{blocked:membros,clearOnPick:true});
+},{clearOnPick:true});
 
 /* PRODUTOS */
 let produtos=[];
-function addProductChip(txt){
-  const c=document.createElement("span");
-  c.className="chip";
-  c.innerHTML=`${txt}<button type="button">×</button>`;
-  c.querySelector("button").onclick=()=>{
-    produtos=produtos.filter(x=>x!==txt);
-    c.remove();
-  };
-  productList.appendChild(c);
-}
 productInput.onkeydown=(e)=>{
   if(e.key==="Enter"){
     e.preventDefault();
-    const val=productInput.value.trim();
-    if(!val) return;
-    produtos.push(val);
-    addProductChip(val);
+    const v=productInput.value.trim();
+    if(!v) return;
+    produtos.push(v);
+    const chip=document.createElement("span");
+    chip.className="chip";
+    chip.innerHTML=`${v}<button>×</button>`;
+    chip.querySelector("button").onclick=()=>chip.remove();
+    productList.appendChild(chip);
     productInput.value="";
   }
 };
 
-/* FOTOS BASE preview */
-let fotosBaseFiles=[];
-photoInput.onchange=()=>{
-  fotosBaseFiles=[...photoInput.files];
-  photoPreview.innerHTML="";
-  fotosBaseFiles.forEach(f=>{
-    const img=document.createElement("img");
-    img.src=URL.createObjectURL(f);
-    img.className="photo-thumb";
-    photoPreview.appendChild(img);
-  });
-};
-
 /* SUBMIT */
-createForm.onsubmit=async (e)=>{
+createForm.onsubmit = async (e)=>{
   e.preventDefault();
   showGhost();
 
   try{
-    // upload foto facção (opcional)
     let faccFotoURL=null;
     if(faccPhotoFile){
       const r=ref(storage,`facc/${Date.now()}_${faccPhotoFile.name}`);
@@ -379,7 +343,6 @@ createForm.onsubmit=async (e)=>{
       faccFotoURL=await getDownloadURL(r);
     }
 
-    // upload fotos base (opcional)
     const baseFotos=[];
     for(const f of fotosBaseFiles){
       const r=ref(storage,`facc_base/${Date.now()}_${f.name}`);
@@ -401,24 +364,17 @@ createForm.onsubmit=async (e)=>{
       },
       baseFotos
     });
-    await logAction("criou", "caso", title.value.trim());
+
+    await logAction("criou", "facção", nome.value.trim());
 
     location.href="ver.html";
+
   }catch(err){
     console.error(err);
-    alert("Erro ao criar. Vê a consola.");
+    alert("Erro ao criar facção.");
     hideGhost();
   }
 };
 </script>
-
-<script>
-agentNameDisplay.textContent=`Agente: ${localStorage.getItem("selectedAgent")||"Desconhecido"}`;
-logoutBtn.onclick=()=>{
-  ["username","selectedAgent","userRole","userCode","isAdmin"].forEach(k=>localStorage.removeItem(k));
-  location.href="../select.html";
-};
-</script>
-
 </body>
 </html>

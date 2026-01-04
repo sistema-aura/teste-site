@@ -481,27 +481,30 @@
         window.location.href = `editar.html?id=${p.id}`;
       });
 
-      // Eliminar
-      card.querySelector('[data-act="del"]')?.addEventListener("click", async ()=>{
-        const ok = await confirmModal({
-          title: "Eliminar pessoa",
-          message: `Esta ação é permanente. Queres eliminar <b>${p.name || p.id}</b>?`,
-          okText: "Eliminar"
-        });
-        if(!ok) return;
+// Eliminar
+card.querySelector('[data-act="del"]')?.addEventListener("click", async ()=>{
+  const ok = await confirmModal({
+    title: "Eliminar pessoa",
+    message: `Esta ação é permanente. Queres eliminar <b>${p.name || p.id}</b>?`,
+    okText: "Eliminar"
+  });
+  if(!ok) return;
 
-        try{
-          await deleteDoc(doc(db,"people",p.id));
-          card.remove();
-          toast("Registo eliminado!");
-          // refresh stats without full reload
-          allPeople = allPeople.filter(x => x.id !== p.id);
-          applyFilters();
-        }catch(e){
-          console.error(e);
-          toast("Erro ao eliminar: " + e.message, "error");
-        }
-      });
+  try{
+    await deleteDoc(doc(db,"people",p.id));
+
+    await logAction("apagou", "pessoa", p.name || "");
+
+    card.remove();
+    toast("Registo eliminado!");
+
+    allPeople = allPeople.filter(x => x.id !== p.id);
+    applyFilters();
+  }catch(e){
+    console.error(e);
+    toast("Erro ao eliminar: " + e.message, "error");
+  }
+});
 
       return card;
     }

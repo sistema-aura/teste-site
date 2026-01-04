@@ -423,8 +423,13 @@
             fileName: f.name,
             fileType: f.type || ""
           });
-          await logAction("criou", "caso", title.value.trim());
-          await logAction("editou", "caso", title.value.trim());
+          await addDoc(collection(db,"reunioes"), novaReuniao);
+
+           await logAction(
+           "criou",
+           "reunião",
+           tituloEl.value.trim() || `Reunião ${dataEl.value}`
+         );
         }
 
         toast("Reunião criada!");

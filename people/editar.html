@@ -84,24 +84,76 @@
       margin-top:1.6rem;
     }
 
-    .danger{
+    /* 👻 FANTASMA */
+    .aura-ghost-bg{
+      position: fixed;
+      inset: 0;
+      background: url("../fantasma_aura_sem_fundo.png") no-repeat center;
+      background-size: min(900px, 85vw);
+      opacity: .14;
+      pointer-events: none;
+      z-index: 0;
+      filter: drop-shadow(0 0 22px rgba(168,85,247,.45));
+      animation: auraFloat 8s ease-in-out infinite;
+    }
+
+    @keyframes auraFloat{
+      0% { transform: translateY(0); }
+      50% { transform: translateY(-22px); }
+      100% { transform: translateY(0); }
+    }
+
+    .main-content{ position:relative; z-index:2; }
+
+    /* ✨ BOTÕES */
+    .btn-aura{
+      border:none;
+      border-radius:14px;
+      padding:.7rem 1.15rem;
+      font-weight:900;
+      color:#fff;
+      cursor:pointer;
+      transition:.18s;
+      box-shadow:0 14px 30px rgba(180,107,255,.18);
+      display:flex;
+      align-items:center;
+      gap:8px;
+    }
+
+    .btn-aura:hover{
+      transform: translateY(-2px);
+      box-shadow:0 18px 40px rgba(180,107,255,.28);
+    }
+
+    .btn-save{
+      background: linear-gradient(135deg,#a855f7,#7c3aed);
+    }
+
+    .btn-back{
+      background: rgba(255,255,255,.08);
+      border:1px solid rgba(255,255,255,.12);
+    }
+
+    .btn-danger{
       background: linear-gradient(135deg,#ff5f6d,#ff7c6b);
     }
   </style>
 </head>
 
 <body>
+
+<div class="aura-ghost-bg"></div>
+
 <div class="main-content">
   <div class="page-container">
 
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem">
       <h1>🖊 Editar Pessoa</h1>
-      <button class="btn btn-soft" onclick="history.back()">← Voltar</button>
+      <button class="btn-aura btn-back" onclick="history.back()">← Voltar</button>
     </div>
 
     <form id="editForm" class="form-card">
 
-      <!-- IDENTIFICAÇÃO -->
       <div class="section">
         <h3>🧾 Identificação</h3>
         <div class="form-grid">
@@ -112,7 +164,7 @@
 
           <div class="form-group">
             <label>Telefone</label>
-            <input id="phone" placeholder="(055) 000-000">
+            <input id="phone">
           </div>
 
           <div class="form-group">
@@ -131,28 +183,14 @@
         </div>
       </div>
 
-      <!-- FOTO -->
-      <div class="section">
-        <h3>📷 Foto (opcional)</h3>
-        <div class="photo-row">
-          <div class="photo-preview">
-            <img id="photoPreview" src="../Aurinha.png">
-          </div>
-          <input type="file" id="photoFile" accept="image/*">
-        </div>
-      </div>
-
-      <!-- OBS -->
       <div class="section">
         <h3>📝 Observações</h3>
-        <textarea id="notes" rows="6"
-          placeholder="Histórico, ligações conhecidas, comportamento, notas importantes para RP…"></textarea>
+        <textarea id="notes" rows="6"></textarea>
       </div>
 
-      <!-- AÇÕES -->
       <div class="actions">
-        <button type="button" id="deleteBtn" class="btn danger">🗑 Eliminar</button>
-        <button class="btn">💾 Guardar Alterações</button>
+        <button type="button" id="deleteBtn" class="btn-aura btn-danger">🗑 Eliminar</button>
+        <button class="btn-aura btn-save" type="submit">💾 Guardar Alterações</button>
       </div>
     </form>
 
@@ -165,31 +203,32 @@ import { getFirestore, doc, getDoc, updateDoc, deleteDoc } from "https://www.gst
 import { firebaseConfig } from "../firebaseConfig.js";
 import { logAction } from "../utils/logger.js";
 
-
 const app = getApps().length ? getApps()[0] : initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
 const id = new URLSearchParams(location.search).get("id");
 if(!id) location.href="ver.html";
 
+/* ELEMENTOS */
+const editForm = document.getElementById("editForm");
+const deleteBtn = document.getElementById("deleteBtn");
+const name = document.getElementById("name");
+const phone = document.getElementById("phone");
+const type = document.getElementById("type");
+const role = document.getElementById("role");
+const roleBox = document.getElementById("roleBox");
+const notes = document.getElementById("notes");
+
 /* TELEFONE */
-const phone=document.getElementById("phone");
 const PREFIX="(055) ";
+phone.value = PREFIX;
 phone.addEventListener("input",()=>{
   let d=phone.value.replace(/\D/g,"").slice(3,9);
   phone.value=PREFIX+(d.length>3?d.slice(0,3)+"-"+d.slice(3):d);
 });
 
-/* CARGO */
-const type=document.getElementById("type");
-const roleBox=document.getElementById("roleBox");
+/* TIPO */
 type.onchange=()=>roleBox.style.display=(type.value==="PM"||type.value==="fac")?"block":"none";
-
-/* FOTO PREVIEW */
-photoFile.onchange=e=>{
-  const f=e.target.files[0];
-  if(f) photoPreview.src=URL.createObjectURL(f);
-};
 
 /* LOAD */
 (async()=>{
@@ -215,16 +254,16 @@ editForm.onsubmit = async e=>{
     role: role.value.trim(),
     notes: notes.value.trim()
   });
+  await logAction("editou", "pessoa", name.value.trim());
   location.href="ver.html";
-       await logAction("editou", "caso", title.value.trim());
 };
 
 /* DELETE */
 deleteBtn.onclick = async ()=>{
   if(!confirm("Eliminar esta pessoa?")) return;
   await deleteDoc(doc(db,"people",id));
+  await logAction("apagou", "pessoa", name.value.trim());
   location.href="ver.html";
-  await logAction("apagou", "caso", title.value.trim());
 };
 </script>
 </body>

@@ -82,16 +82,90 @@
       justify-content:flex-end;
       margin-top:1.6rem;
     }
+
+    /* ===========================
+       👻 FANTASMA FULLSCREEN
+       =========================== */
+    .aura-ghost-bg{
+      position: fixed;
+      inset: 0;
+      background: url("../fantasma_aura_sem_fundo.png") no-repeat center;
+      background-size: min(900px, 85vw);
+      opacity: .14;
+      pointer-events: none;
+      z-index: 0;
+      filter: drop-shadow(0 0 22px rgba(168,85,247,.45));
+      animation: auraFloat 8s ease-in-out infinite;
+    }
+
+    @keyframes auraFloat{
+      0%   { transform: translateY(0) scale(1); }
+      50%  { transform: translateY(-22px) scale(1.03); }
+      100% { transform: translateY(0) scale(1); }
+    }
+
+    /* garante que o conteúdo fica acima do fantasma */
+    .main-content{
+      position: relative;
+      z-index: 2;
+    }
+
+    /* ===========================
+       ✨ BOTÕES MAIS BONITOS
+       =========================== */
+    .btn-aura{
+      border: none;
+      border-radius: 14px;
+      padding: .7rem 1.15rem;
+      font-weight: 900;
+      color: #fff;
+      cursor: pointer;
+      transition: .18s ease;
+      box-shadow: 0 14px 30px rgba(180,107,255,.18);
+      letter-spacing: .2px;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .btn-aura:hover{
+      transform: translateY(-2px);
+      box-shadow: 0 18px 40px rgba(180,107,255,.28);
+    }
+
+    .btn-aura:active{
+      transform: translateY(0px);
+      box-shadow: 0 10px 22px rgba(180,107,255,.18);
+    }
+
+    .btn-aura-save{
+      background: linear-gradient(135deg,#a855f7,#7c3aed);
+    }
+
+    .btn-aura-back{
+      background: rgba(255,255,255,.08);
+      border: 1px solid rgba(255,255,255,.10);
+      box-shadow: 0 12px 26px rgba(180,107,255,.10);
+    }
+
+    .btn-aura-back:hover{
+      background: rgba(180,107,255,.14);
+      border-color: rgba(180,107,255,.22);
+    }
   </style>
 </head>
 
 <body>
+
+<!-- 👻 Fantasma no ecrã todo -->
+<div class="aura-ghost-bg"></div>
+
 <div class="main-content">
   <div class="page-container">
 
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem">
       <h1>➕ Criar Nova Pessoa</h1>
-      <button class="btn btn-soft" onclick="history.back()">← Voltar</button>
+      <button class="btn-aura btn-aura-back" onclick="history.back()">← Voltar</button>
     </div>
 
     <form id="createForm" class="form-card">
@@ -146,7 +220,7 @@
 
       <!-- AÇÃO -->
       <div class="actions">
-        <button class="btn">💾 Guardar Pessoa</button>
+        <button class="btn-aura btn-aura-save" type="submit">💾 Guardar Pessoa</button>
       </div>
     </form>
 
@@ -159,42 +233,50 @@ import { getFirestore, addDoc, collection, serverTimestamp } from "https://www.g
 import { firebaseConfig } from "../firebaseConfig.js";
 import { logAction } from "../utils/logger.js";
 
-
 const app = getApps().length ? getApps()[0] : initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
 /* TELEFONE */
-const phone=document.getElementById("phone");
-const PREFIX="(055) ";
-phone.value=PREFIX;
+const phone = document.getElementById("phone");
+const PREFIX = "(055) ";
+phone.value = PREFIX;
 phone.addEventListener("input",()=>{
-  let d=phone.value.replace(/\D/g,"").slice(3,9);
-  phone.value=PREFIX+(d.length>3?d.slice(0,3)+"-"+d.slice(3):d);
+  let d = phone.value.replace(/\D/g,"").slice(3,9);
+  phone.value = PREFIX + (d.length>3 ? d.slice(0,3)+"-"+d.slice(3) : d);
 });
 
 /* CARGO */
-const type=document.getElementById("type");
-const roleBox=document.getElementById("roleBox");
-type.onchange=()=>roleBox.style.display=(type.value==="PM"||type.value==="fac")?"block":"none";
+const type = document.getElementById("type");
+const roleBox = document.getElementById("roleBox");
+type.onchange = ()=> roleBox.style.display = (type.value==="PM"||type.value==="fac") ? "block" : "none";
 
 /* FOTO PREVIEW */
-photoFile.onchange=e=>{
-  const f=e.target.files[0];
-  if(f) photoPreview.src=URL.createObjectURL(f);
+const photoFile = document.getElementById("photoFile");
+const photoPreview = document.getElementById("photoPreview");
+photoFile.onchange = e=>{
+  const f = e.target.files[0];
+  if(f) photoPreview.src = URL.createObjectURL(f);
 };
 
 /* SUBMIT */
-createForm.onsubmit=async e=>{
+const createForm = document.getElementById("createForm");
+const name = document.getElementById("name");
+const role = document.getElementById("role");
+const notes = document.getElementById("notes");
+
+createForm.onsubmit = async e=>{
   e.preventDefault();
+
   await addDoc(collection(db,"people"),{
-    name:name.value.trim(),
-    phone:phone.value,
-    type:type.value,
-    role:role.value.trim(),
-    notes:notes.value.trim(),
-    createdAt:serverTimestamp()
+    name: name.value.trim(),
+    phone: phone.value,
+    type: type.value,
+    role: (role?.value || "").trim(),
+    notes: notes.value.trim(),
+    createdAt: serverTimestamp()
   });
-  await logAction("criou", "caso", title.value.trim());
+
+  await logAction("criou", "pessoa", name.value.trim());
   location.href="ver.html";
 };
 </script>

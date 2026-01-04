@@ -392,10 +392,10 @@ createForm.onsubmit=async e=>{
     estado:"ativo",
     createdAt:serverTimestamp()
   });
-
+await logAction("criou", "investigação", titulo.value.trim());
   location.href="ver.html";
 };
-await logAction("criou", "caso", title.value.trim());
+
 </script>
 
 <script>

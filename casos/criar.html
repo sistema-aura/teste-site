@@ -48,7 +48,6 @@
 
     textarea{ resize:vertical; }
 
-    /* ===== RELATION BLOCK ===== */
     .relation-block{
       background:rgba(180,107,255,.06);
       border:1px solid rgba(180,107,255,.18);
@@ -67,7 +66,6 @@
       color:#e9d5ff;
     }
 
-    /* ===== SEARCH BAR ===== */
     .search-wrapper{
       position:relative;
       margin-top:.2rem;
@@ -105,7 +103,6 @@
       pointer-events:none;
     }
 
-    /* AUTOCOMPLETE */
     .autocomplete-box{ position:relative; }
 
     .autocomplete-list{
@@ -133,7 +130,6 @@
       background:rgba(180,107,255,.22);
     }
 
-    /* CHIPS */
     .chip-list{
       display:flex;
       flex-wrap:wrap;
@@ -161,7 +157,6 @@
       font-weight:900;
     }
 
-    /* BOTÃO */
     .btn-save{
       background:linear-gradient(135deg,#a855f7,#7c3aed);
       border:none;
@@ -190,7 +185,6 @@
       margin-top:1.8rem;
     }
 
-    /* 👻 GHOST */
     .ghost-overlay{
       position:fixed;
       inset:0;
@@ -226,24 +220,23 @@
   <h2 class="logo">SISTEMA AURA</h2>
   <span id="agentNameDisplay" class="agent-display">Agente: -</span>
 
-    <ul>
-      <li><a href="../dashboard.html" class="navlink active"><span class="icon">🏠</span><span class="label">Dashboard</span></a></li>
-      <li><a href="../pesquisa/ver.html" class="navlink"><span class="icon">🔍</span><span class="label">Pesquisa Geral</span></a></li>
-      <li><a href="../perfis/ver.html" class="navlink"><span class="icon">👑</span><span class="label">Perfil da Aura</span></a></li>
-      <li><a href="../people/ver.html" class="navlink"><span class="icon">🧍</span><span class="label">Pessoas</span></a></li>
-      <li><a href="../casos/ver.html" class="navlink"><span class="icon">📁</span><span class="label">Casos</span></a></li>
-      <li><a href="../investigacoes/ver.html" class="navlink"><span class="icon">🕵️</span><span class="label">Investigações</span></a></li>
-      <li><a href="../veiculos/ver.html" class="navlink"><span class="icon">🏎️</span><span class="label">Veículos</span></a></li>
-      <li><a href="../facc/ver.html" class="navlink"><span class="icon">⚔️</span><span class="label">Facções</span></a></li>
-      <li><a href="../perimetro/ver.html" class="navlink"><span class="icon">📍</span><span class="label">Perímetro de Ações</span></a></li>
-      <li><a href="../reunioes/ver.html" class="navlink"><span class="icon">🗓️</span><span class="label">Reuniões</span></a></li>
+  <ul>
+    <li><a href="../dashboard.html" class="navlink active"><span class="icon">🏠</span><span class="label">Dashboard</span></a></li>
+    <li><a href="../pesquisa/ver.html" class="navlink"><span class="icon">🔍</span><span class="label">Pesquisa Geral</span></a></li>
+    <li><a href="../perfis/ver.html" class="navlink"><span class="icon">👑</span><span class="label">Perfil da Aura</span></a></li>
+    <li><a href="../people/ver.html" class="navlink"><span class="icon">🧍</span><span class="label">Pessoas</span></a></li>
+    <li><a href="../casos/ver.html" class="navlink"><span class="icon">📁</span><span class="label">Casos</span></a></li>
+    <li><a href="../investigacoes/ver.html" class="navlink"><span class="icon">🕵️</span><span class="label">Investigações</span></a></li>
+    <li><a href="../veiculos/ver.html" class="navlink"><span class="icon">🏎️</span><span class="label">Veículos</span></a></li>
+    <li><a href="../facc/ver.html" class="navlink"><span class="icon">⚔️</span><span class="label">Facções</span></a></li>
+    <li><a href="../perimetro/ver.html" class="navlink"><span class="icon">📍</span><span class="label">Perímetro de Ações</span></a></li>
+    <li><a href="../reunioes/ver.html" class="navlink"><span class="icon">🗓️</span><span class="label">Reuniões</span></a></li>
+    <li><a href="../regras/ver.html" class="navlink"><span class="icon">📚</span><span class="label">Regras CDA</span></a></li>
+  </ul>
 
-      <!-- AQUI: removi o active do Regras CDA -->
-      <li><a href="../regras/ver.html" class="navlink"><span class="icon">📚</span><span class="label">Regras CDA</span></a></li>
-    </ul>
+  <button id="logoutBtn">Sair</button>
+</div>
 
-    <button id="logoutBtn">Sair</button>
-  </div>
 <div class="main-content">
   <div class="page-container">
 
@@ -268,7 +261,6 @@
         </div>
       </div>
 
-      <!-- 👥 PESSOAS -->
       <div class="relation-block">
         <div class="relation-header">👥 Pessoas Envolvidas</div>
         <div class="autocomplete-box search-wrapper">
@@ -279,7 +271,6 @@
         <div id="peopleChips" class="chip-list"></div>
       </div>
 
-      <!-- 🚗 VEÍCULOS -->
       <div class="relation-block">
         <div class="relation-header">🚗 Veículos Envolvidos</div>
         <div class="autocomplete-box search-wrapper">
@@ -290,7 +281,6 @@
         <div id="vehicleChips" class="chip-list"></div>
       </div>
 
-      <!-- ⚔️ FACÇÕES -->
       <div class="relation-block">
         <div class="relation-header">⚔️ Facções Envolvidas</div>
         <div class="autocomplete-box search-wrapper">
@@ -385,29 +375,42 @@ function showGhost(){
   g.className="ghost-overlay";
   g.innerHTML=`<img src="../fantasma_aura_sem_fundo.png">`;
   document.body.appendChild(g);
+  return g;
 }
 
 createForm.onsubmit = async e=>{
   e.preventDefault();
+
+  const t = title.value.trim();
+  if(!t){
+    alert("O título é obrigatório.");
+    return;
+  }
+
   saveBtn.disabled=true;
-  showGhost();
+  const ghost = showGhost();
 
-await addDoc(collection(db,"cases"),{
-  title: title.value.trim(),
-  responsible: responsible.value.trim(),
-  people: selected.people,
-  vehicles: selected.vehicles,
-  factions: selected.factions,
-  description: description.value.trim(),
-  archived: false,
-  createdAt: serverTimestamp()
-});
+  try{
+    await addDoc(collection(db,"cases"),{
+      title: t,
+      responsible: responsible.value.trim(),
+      people: selected.people,
+      vehicles: selected.vehicles,
+      factions: selected.factions,
+      description: description.value.trim(),
+      archived: false,
+      createdAt: serverTimestamp()
+    });
 
-// LOG 👇
-await logAction("criou", "caso", title.value.trim());
+    await logAction("criou", "caso", t);
 
-
-  setTimeout(()=>location.href="ver.html",700);
+    setTimeout(()=>location.href="ver.html",600);
+  }catch(err){
+    console.error("Erro ao criar caso:", err);
+    alert("Erro ao criar caso.");
+    saveBtn.disabled=false;
+    ghost.remove();
+  }
 };
 </script>
 

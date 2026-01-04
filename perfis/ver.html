@@ -250,8 +250,10 @@
           itemName: itemName || "",
           user: localStorage.getItem("selectedAgent") || "Desconhecido",
           timestamp: serverTimestamp()
+
         });
-        await logAction("criou", "caso", title.value.trim());
+        await logAction("visualizou", "perfil", nameEl.value.trim());
+
       }catch(e){
         console.warn("log falhou", e);
       }

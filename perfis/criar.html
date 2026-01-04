@@ -241,9 +241,10 @@
     } catch (e) {
       console.error("Erro ao criar:", e);
       toast("Erro: " + e.message, "error");
+      await logAction("criou", "perfil", nameEl.value.trim());
+
     }
   });
-  await logAction("criou", "caso", title.value.trim());
 </script>
 
   <script>
